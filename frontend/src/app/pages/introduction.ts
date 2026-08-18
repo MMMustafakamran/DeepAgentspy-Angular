@@ -2,25 +2,36 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { BackendHealth } from '../components/backend-health';
+import { DocDriftPanel } from '../components/doc-drift-panel';
 import { RouteHeader } from '../components/route-header';
 import { Callout, Panel, SourceCode } from '../components/ui';
-import { DOC_SYNC_DATE, NAV } from '../lib/nav-config';
+import { NAV } from '../lib/nav-config';
 
 @Component({
   selector: 'app-introduction-page',
-  imports: [RouterLink, RouteHeader, BackendHealth, Panel, Callout, SourceCode],
+  imports: [
+    RouterLink,
+    RouteHeader,
+    BackendHealth,
+    DocDriftPanel,
+    Panel,
+    Callout,
+    SourceCode,
+  ],
   template: `
     <app-route-header path="/" />
 
     <div class="space-y-6">
       <app-backend-health />
 
+      <doc-drift-panel />
+
       <ui-panel heading="What this is">
         <p class="text-sm text-slate-700">
           A navigable test harness for the Angular + DeepAgents section of the
           CopilotKit docs. Every guide listed in the sidebar is a route, and
           each route runs the thing its doc page teaches rather than restating
-          it. Docs were last synced on {{ docSyncDate }}.
+          it.
         </p>
         <p class="mt-3 text-sm text-slate-700">
           Routes with a live feature are split in two: the route itself holds
@@ -96,5 +107,4 @@ Model  (gpt-5.4)</code></pre>
 })
 export default class IntroductionPage {
   protected readonly nav = NAV;
-  protected readonly docSyncDate = DOC_SYNC_DATE;
 }
