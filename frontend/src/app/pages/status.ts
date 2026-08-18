@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { StatusBadge } from '../components/ui';
-import { ALL_ROUTES, DOC_SYNC_DATE, docUrl } from '../lib/nav-config';
+import { ALL_ROUTES, docUrl } from '../lib/nav-config';
 
 @Component({
   selector: 'app-status-page',
@@ -11,7 +11,7 @@ import { ALL_ROUTES, DOC_SYNC_DATE, docUrl } from '../lib/nav-config';
     <header class="mb-6 border-b border-slate-200 pb-5">
       <h1 class="text-2xl font-bold text-slate-900">Status overview</h1>
       <p class="mt-2 text-sm text-slate-600">
-        Every route and the doc page it tests. Docs synced {{ docSyncDate }}.
+        Every route and the doc page it tests. The doc-sync date lives on <a routerLink="/doc-sync" class="underline">/doc-sync</a>.
         This table and the sidebar both read from
         <code>src/app/lib/nav-config.ts</code>, so a status is stated once.
       </p>
@@ -75,7 +75,6 @@ import { ALL_ROUTES, DOC_SYNC_DATE, docUrl } from '../lib/nav-config';
 })
 export default class StatusPage {
   protected readonly routes = ALL_ROUTES;
-  protected readonly docSyncDate = DOC_SYNC_DATE;
 
   protected doc(docPath: string): string {
     return docUrl({ docPath } as Parameters<typeof docUrl>[0]);

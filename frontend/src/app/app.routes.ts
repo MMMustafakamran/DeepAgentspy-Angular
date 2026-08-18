@@ -87,6 +87,7 @@ export const routes: Routes = [
       },
       { path: 'headless', loadComponent: () => import('./pages/headless') },
       { path: 'status', loadComponent: () => import('./pages/status') },
+      { path: 'doc-sync', loadComponent: () => import('./pages/doc-sync') },
       { path: '**', redirectTo: '' },
     ],
   },
