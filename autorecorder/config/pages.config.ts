@@ -1,0 +1,389 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  ADAPT THIS FILE — 3 of 3
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * One entry per doc page, in the order the doc nav lists them.
+ *
+ * Entries are deliberately short. `docUrl`, `demoUrl` and the output filename
+ * are derived from `project.config.ts` plus the fields below, so no entry can
+ * point at the wrong framework's docs and filenames stay in nav order without
+ * anyone numbering them by hand.
+ *
+ * Everything here mirrors `frontend/src/app/lib/nav-config.ts`, the app's own
+ * source of truth for route -> doc-page mapping. `docPath` is that file's
+ * `docPath` minus its leading `/angular/deepagents`. Four routes (threads,
+ * memory, attachments, headless) repeat one `docPath` because the Angular docs
+ * cover all four topics on a single page — that is the doc's shape, not a
+ * copy/paste slip.
+ *
+ * ── Scope ──────────────────────────────────────────────────────────────────
+ * `route` + `demoSuffix` is the only demo URL a page can have, and the doctor
+ * errors on any that is not 200. The app's nav lists 13 routes; `/` (the
+ * landing page) and `/doc-sync` have no `hasDemo`, and `/status` is app
+ * furniture rather than a doc page. The other 11 are all here.
+ *
+ * The numbering that results — a2ui at 04, memory at 09 — is the same
+ * numbering the Angular sibling repos reserve empty slots for, so a
+ * DAPY-angular clip and its MSPY-angular counterpart carry the same index for
+ * the same guide. Do not reorder without checking those.
+ *
+ * ── The line ranges ────────────────────────────────────────────────────────
+ * `startLine`/`endLine` are what the simulated IDE highlights. Unlike the
+ * sibling Angular repos, this frontend brackets nothing: there are no
+ * `[!code highlight]`, `#region`, or `// <topic> : <snippet> start|end`
+ * markers anywhere under `src/app/features/`. Every range below was therefore
+ * read off the file by hand, and `npm run doctor` can only prove a range is
+ * in-bounds — not that it still frames the code the page is about.
+ *
+ * **Re-read them after editing any feature component.** Teaching the doctor a
+ * marker syntax would restore the guard, but this repo would have to grow the
+ * markers first.
+ *
+ * ── `knownIssue` ───────────────────────────────────────────────────────────
+ * This repo is not only documenting an integration that works. Four of the
+ * pages below are on the QA report as broken, and their clips exist to show
+ * that. `knownIssue` is what makes the run say `[ISSUE]` rather than `[PASS]`,
+ * and it is the same object `ci/build-report.mjs` renders into the daily
+ * report — so the sentence typed on screen and the row that goes to the
+ * manager are one string, written here, once.
+ *
+ * A page whose defect gets fixed upstream should have its `knownIssue` deleted
+ * in the same change that confirms the fix. Leaving a stale one behind is
+ * worse than having none: the clip keeps asserting a bug that is gone.
+ */
+
+import { definePages } from '../core/types';
+
+export const PAGES = definePages([
+  // ── Getting Started ──────────────────────────────────────────────────────
+  {
+    id: 'quickstart',
+    name: 'Quickstart',
+    videoName: 'Quickstart',
+    docPath: 'quickstart',
+    route: 'quickstart',
+    // Leads with the versions, not the manifest. package.json declares RANGES,
+    // so a clip of it shows a floor while the run it documents has installed
+    // something newer. VERSIONS.md is generated after install
+    // (ci/write-versions.mjs) and names what actually resolved.
+    ideFile: 'frontend/VERSIONS.md',
+    startLine: 1,
+    endLine: 16,
+    // Then the path itself, in the order a request travels it: the manifest a
+    // reader would copy, the chat component, the Node process hosting the
+    // runtime (Angular has no server route to host it in), and the graph it
+    // proxies to.
+    extraTabs: [
+      // The `dependencies` block: @copilotkit/angular, @copilotkit/runtime and
+      // @ag-ui/langgraph legible in one frame.
+      { filePath: 'frontend/package.json', startLine: 19, endLine: 37 },
+      { filePath: 'frontend/src/app/features/quickstart/quickstart-chat.ts', startLine: 8, endLine: 20 },
+      // The LangGraphAgent bindings and the a2ui middleware switch.
+      { filePath: 'frontend/server.ts', startLine: 24, endLine: 47 },
+      // The graph itself — 12 lines, so the whole file.
+      { filePath: 'backend/main.py', startLine: 1, endLine: 12 },
+    ],
+    prompt: 'Can you tell me a joke?',
+    waitAfterPromptMs: 4000,
+  },
+
+  // ── Guides ───────────────────────────────────────────────────────────────
+  {
+    id: 'chat-ui',
+    name: 'Guides - Chat UI and customization',
+    videoName: 'ChatUi',
+    docPath: 'guides/chat-ui',
+    route: 'chat-ui',
+    // The surface switch: which of the four chats is mounted.
+    ideFile: 'frontend/src/app/features/chat-ui/chat-ui-demo.component.ts',
+    startLine: 57,
+    endLine: 69,
+    // The replaced assistant message is the guide's actual lesson; the wrapper
+    // above only chooses which surface is mounted.
+    extraTabs: [
+      {
+        filePath: 'frontend/src/app/features/chat-ui/custom-assistant-message.component.ts',
+        startLine: 13,
+        endLine: 25,
+      },
+    ],
+    // Four surfaces, driven in order by the handler: inline, custom assistant
+    // message, popup, sidebar. Only the first two take a prompt.
+    prompt: 'What is CopilotKit?',
+    prompts: [
+      'What is CopilotKit?',
+      'Tell me what makes your custom assistant layout unique.',
+    ],
+    waitAfterPromptMs: 4000,
+  },
+  {
+    id: 'frontend-tools-generative-ui',
+    name: 'Guides - Frontend tools and generative UI',
+    videoName: 'FrontendToolsGenerativeUi',
+    docPath: 'guides/frontend-tools-generative-ui',
+    route: 'frontend-tools-generative-ui',
+    // The constructor is the lesson: `registerRenderToolCall` for the
+    // server-side tool, `registerFrontendTool` for the browser-side one.
+    ideFile: 'frontend/src/app/features/tools/tools-chat.component.ts',
+    startLine: 47,
+    endLine: 60,
+    extraTabs: [
+      { filePath: 'frontend/src/app/features/tools/weather-card.component.ts', startLine: 10, endLine: 27 },
+      // The other half of the pair: getWeather runs in the DeepAgents graph and
+      // the browser only renders the call.
+      //
+      // Worth watching on the clip: the graph declares `getWeather(location)`
+      // while the renderer above binds `call.args.city`, so the card can render
+      // with an empty heading even though the agent answers correctly. The QA
+      // report scores this page as passing and records no symptom for it, so it
+      // carries no `knownIssue` — but if the card looks wrong on the video,
+      // this is why, and it is worth re-testing deliberately.
+      { filePath: 'backend/main.py', startLine: 4, endLine: 12 },
+    ],
+    // Two turns: a server-side tool the browser only renders, then a frontend
+    // tool whose result is the page itself repainting.
+    prompt: "What's the weather in Tokyo?",
+    prompts: ["What's the weather in Tokyo?", 'Change the background to violet'],
+    waitAfterPromptMs: 4000,
+  },
+  {
+    id: 'a2ui',
+    name: 'Guides - A2UI schemas, styling, and recovery',
+    videoName: 'A2ui',
+    docPath: 'guides/a2ui',
+    route: 'a2ui',
+    // The component is four lines of chat: per the guide, "on the frontend the
+    // A2UI renderer activates automatically. No extra configuration is needed."
+    // That claim is the thing under test, so the component leads and the two
+    // places configuration actually lives follow it.
+    ideFile: 'frontend/src/app/features/a2ui/a2ui-chat.component.ts',
+    startLine: 11,
+    endLine: 22,
+    extraTabs: [
+      // `a2ui.recovery` is set; `a2ui.catalog` is not. That absence is the
+      // whole finding, so the range covers the provider block where a catalog
+      // would go.
+      { filePath: 'frontend/src/app/app.config.ts', startLine: 44, endLine: 66 },
+      // `a2ui: {}` — the runtime half, which /info duly reports as enabled.
+      { filePath: 'frontend/server.ts', startLine: 39, endLine: 45 },
+    ],
+    prompt:
+      'Show me a flight card for BA117 from London to New York, as a rendered UI component.',
+    waitAfterPromptMs: 5000,
+    // Observed 28 Aug 2026 against @copilotkit/angular 0.3.1 / runtime 1.67.1.
+    // NOTE the difference from the React/Python report, which describes this as
+    // `Catalog not found: https://a2ui.org/.../basic_catalog.json`. On Angular
+    // there is no such error: the console is clean and nothing is fetched. The
+    // two frontends fail differently, and the report says what this one does.
+    knownIssue: {
+      area: 'Deep Agents (Angular) - Guides - A2UI schemas, styling, and recovery',
+      problem:
+        'Asking for a declarative surface returns ordinary prose. No A2UI component is rendered, and — unlike ' +
+        'the React/Python build of the same guide — nothing is logged: the browser console is clean and no ' +
+        'catalog request is attempted. The renderer never activates at all rather than activating and failing.',
+      impact:
+        'A2UI cannot be used on this page, and the failure is silent. Because there is no error anywhere, a ' +
+        'reader following the guide has no way to tell a missing catalog from a model that simply chose to ' +
+        'answer in text, which makes the feature undebuggable as documented.',
+      likelyCause:
+        'Supplying `a2ui.catalog` to provideCopilotKit is what registers the render_a2ui renderer, and no ' +
+        "catalog is supplied — the guide's catalog snippet is not self-contained (it references " +
+        '`dynamicString`, `beautifulCatalog`, `declarativeCatalog`, `fixedCatalog` and `productCatalog`, none ' +
+        'of which the guide defines). The runtime reports `a2uiEnabled: true`, so the middleware is on and ' +
+        'only the browser-side renderer is missing.',
+    },
+  },
+  {
+    id: 'voice-multimodal',
+    name: 'Guides - Voice and multimodal input',
+    videoName: 'VoiceMultimodal',
+    docPath: 'guides/voice-multimodal',
+    route: 'voice-multimodal',
+    // The guide's `MULTIMODAL_ATTACHMENTS` config bound to the chat. The
+    // microphone control itself needs no option — it is always present, which
+    // is exactly why its failure is not a configuration mistake.
+    ideFile: 'frontend/src/app/features/media/voice-chat.component.ts',
+    startLine: 9,
+    endLine: 25,
+    // The handler proves the multimodal half works before showing the voice
+    // half failing, so the video separates the two claims.
+    prompt: 'Tell me a joke.',
+    waitAfterPromptMs: 4000,
+    knownIssue: {
+      area: 'Deep Agents (Angular) - Guides - Voice and multimodal input',
+      problem:
+        'The microphone control renders, requests permission and records, but the audio is never transcribed: ' +
+        'stopping the recording posts a transcription request that fails, and nothing is placed in the composer. ' +
+        'Image attachments on the same composer are read correctly, so the multimodal half of the guide works ' +
+        'and only the voice half does not.',
+      impact:
+        'Voice input is unusable. The control gives every visual signal of working — permission prompt, ' +
+        'recording state, elapsed timer — and then silently produces no text, so a user has no indication that ' +
+        'the feature is not wired up rather than mishearing them.',
+      likelyCause:
+        'This Copilot Runtime configures no transcription service. `frontend/server.ts` constructs ' +
+        'CopilotRuntime with agents and `a2ui` only, so the transcribe endpoint the composer posts to has ' +
+        'nothing behind it.',
+    },
+  },
+  {
+    id: 'human-in-the-loop',
+    name: 'Guides - Human-in-the-loop and interrupts',
+    videoName: 'HumanInTheLoop',
+    docPath: 'guides/human-in-the-loop',
+    route: 'human-in-the-loop',
+    // The registration is the lesson; the card is what the viewer clicks.
+    ideFile: 'frontend/src/app/features/hitl/approval-tools.service.ts',
+    startLine: 13,
+    endLine: 26,
+    extraTabs: [
+      { filePath: 'frontend/src/app/features/hitl/approval-card.component.ts', startLine: 16, endLine: 39 },
+    ],
+    prompt: 'Delete my account, but ask me to approve it first.',
+    waitAfterPromptMs: 4000,
+  },
+  {
+    id: 'shared-state',
+    name: 'Guides - Shared state and agent context',
+    videoName: 'SharedState',
+    docPath: 'guides/shared-state',
+    // `injectAgentStore` read through `state()`, written through
+    // `agent.setState` — both halves in one frame.
+    ideFile: 'frontend/src/app/features/shared-state/workspace.component.ts',
+    route: 'shared-state',
+    startLine: 37,
+    endLine: 48,
+    extraTabs: [
+      // The other way to publish context: read-only, via connectAgentContext.
+      {
+        filePath: 'frontend/src/app/features/shared-state/account-context.component.ts',
+        startLine: 18,
+        endLine: 31,
+      },
+    ],
+    // Read the state, change it from the UI, read it again, then prove the
+    // read-only context channel independently.
+    prompt: 'what is priority set as?',
+    prompts: [
+      'what is priority set as?',
+      'what is priority set as?',
+      'what is my timezone?',
+    ],
+    waitAfterPromptMs: 4000,
+  },
+
+  // ── Threads, memory, attachments, headless ───────────────────────────────
+  {
+    id: 'threads',
+    name: 'Threads',
+    videoName: 'Threads',
+    docPath: 'guides/threads-memory-attachments-headless',
+    route: 'threads',
+    ideFile: 'frontend/src/app/features/threads/thread-list.component.ts',
+    startLine: 8,
+    endLine: 39,
+    extraTabs: [
+      // The drop-in half of the guide: CopilotThreadsDrawer beside a chat,
+      // under one provideCopilotChatConfiguration.
+      { filePath: 'frontend/src/app/features/threads/conversations.component.ts', startLine: 7, endLine: 23 },
+      { filePath: 'frontend/src/app/features/threads/threads-demo.component.ts', startLine: 10, endLine: 35 },
+    ],
+    prompt: 'Give me a one-line summary of what threads are for.',
+    waitAfterPromptMs: 4000,
+    // Observed 28 Aug 2026. This finding was rewritten after watching the
+    // network: the original assumption (borrowed from the sibling repos) was
+    // that listing is unlicensed and the drawer renders a locked state. Neither
+    // is true here. `GET /api/copilotkit/threads?agentId=support&limit=20`
+    // answers 200 with a real thread, and the hand-built list displays it. It is
+    // the drop-in component that renders nothing at all.
+    knownIssue: {
+      area: 'Deep Agents (Angular) - Threads, memory, attachments, headless - Threads',
+      problem:
+        '`CopilotThreadsDrawer` renders completely empty — no list, no launcher, no locked state, no error. ' +
+        'The data it needs is demonstrably available: on the same page the hand-built `injectThreads` list ' +
+        'shows a thread returned by `GET /api/copilotkit/threads` (200), which renders as "Untitled ' +
+        'conversation" because the API returns `name: null`. Creating a conversation additionally does not ' +
+        'persist — the runtime reports `threadEndpoints.mutations: false`.',
+      impact:
+        'The drop-in component the guide leads with is unusable, and silently so: a reader who follows the ' +
+        'guide gets a blank area with nothing indicating a missing licence, a failed request, or an empty ' +
+        'state. Naming or re-titling a conversation is impossible, so every thread reads as "Untitled".',
+      likelyCause:
+        'Two separate causes. The empty drawer is a rendering failure in `copilot-threads-drawer` rather than ' +
+        'a data problem, since the same endpoint feeds the working list beside it. The non-persistence is a ' +
+        'capability gap: `mutations: false` in the runtime\'s /info means thread create/rename/delete have no ' +
+        'store behind them, which the guide documents no requirement for.',
+    },
+  },
+  {
+    id: 'memory',
+    name: 'Memory',
+    videoName: 'Memory',
+    docPath: 'guides/threads-memory-attachments-headless',
+    route: 'memory',
+    // `injectMemories` plus the `isAvailable()` gate the guide requires before
+    // showing any memory control. The gate is the whole sample.
+    ideFile: 'frontend/src/app/features/memory/memory-list.component.ts',
+    startLine: 7,
+    endLine: 32,
+    extraTabs: [
+      { filePath: 'frontend/src/app/features/memory/memory-demo.component.ts', startLine: 10, endLine: 29 },
+    ],
+    prompt: 'Remember that I prefer concise status updates.',
+    waitAfterPromptMs: 4000,
+    // Observed 28 Aug 2026. Also rewritten after watching the network, and this
+    // one inverts the expectation recorded in the repo's own nav-config, which
+    // says isAvailable() is false and the fallback message renders. It does not:
+    // the component renders NOTHING, which is only reachable through the @else
+    // branch — so isAvailable() is true — and no memory request is ever sent.
+    knownIssue: {
+      area: 'Deep Agents (Angular) - Threads, memory, attachments, headless - Memory',
+      problem:
+        '`app-memory-list` renders nothing at all: no memories, and not the guide\'s "Memory is not available ' +
+        'for this runtime." fallback either. Since that fallback is the `@if (!isAvailable())` branch, the gate ' +
+        'is returning true — yet no request to any memory endpoint is ever issued, and asking the agent to ' +
+        'remember something stores nothing.',
+      impact:
+        'Memory is unusable and indistinguishable from a component that failed to mount. The guide\'s ' +
+        '`isAvailable()` gate — the one safeguard it prescribes — reports the feature as available while it ' +
+        'demonstrably is not, so the documented way of checking gives the wrong answer and a reader gets a ' +
+        'blank panel with no explanation.',
+      likelyCause:
+        'Unknown. `isAvailable()` appears to report availability without the runtime exposing memory routes — ' +
+        "the runtime's /info advertises thread endpoints but nothing for memory — so either the gate defaults " +
+        'to true when the capability is unreported, or the fetch is gated behind something the guide does not ' +
+        'mention. This needs confirming against a licensed runtime before the cause is stated with confidence.',
+    },
+  },
+  {
+    id: 'attachments',
+    name: 'Attachments',
+    videoName: 'Attachments',
+    docPath: 'guides/threads-memory-attachments-headless',
+    route: 'attachments',
+    ideFile: 'frontend/src/app/features/attachments/media-chat.component.ts',
+    startLine: 9,
+    endLine: 23,
+    // Asks for two values that exist only inside the attached image, so a
+    // correct answer is proof the file reached the model. A generic "what types
+    // of attachment are supported?" could be answered from the system prompt
+    // alone, which is how a broken upload comes to look fine on video.
+    prompt: 'Read the attached chart. What is its title, and what is the Q4 value?',
+    waitAfterPromptMs: 4000,
+  },
+  {
+    id: 'headless',
+    name: 'Headless UI',
+    videoName: 'HeadlessUi',
+    docPath: 'guides/threads-memory-attachments-headless',
+    route: 'headless',
+    // No CopilotKit chrome at all: transcript and composer hand-written over
+    // injectAgentStore, run driven through CopilotKitCore.runAgent.
+    ideFile: 'frontend/src/app/features/headless/headless-chat.component.ts',
+    startLine: 10,
+    endLine: 60,
+    prompt: 'Tell me a short joke about Angular.',
+    waitAfterPromptMs: 4000,
+  },
+]);
