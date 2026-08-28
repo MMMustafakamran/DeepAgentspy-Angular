@@ -116,9 +116,13 @@ export const NAV: NavGroup[] = [
         docPath: '/angular/deepagents/guides/a2ui',
         summary:
           'Declarative generative UI driven by the runtime A2UI middleware, with the guide’s recovery thresholds and catalog CSS.',
-        status: 'partial',
+        status: 'broken',
+        // Confirmed 28 Aug 2026, and worth stating precisely: the React/Python
+        // build of this guide fails with a visible `Catalog not found:
+        // https://a2ui.org/.../basic_catalog.json`. Angular does not. Here the
+        // console is clean and no catalog fetch is attempted at all.
         statusNote:
-          'Inert until a catalog is supplied. /info reports a2uiEnabled: true, but supplying a2ui.catalog is what actually registers the render_a2ui renderer — and the guide’s catalog snippet is not self-contained. See Known issues.',
+          'Inert until a catalog is supplied, and silently so. /info reports a2uiEnabled: true, but supplying a2ui.catalog is what registers the render_a2ui renderer — and the guide’s catalog snippet is not self-contained. Asking for a surface returns prose with nothing logged: no error, no catalog request. (The React build of this guide fails loudly with a “Catalog not found” error; this one does not.) See Known issues.',
       },
       {
         path: '/voice-multimodal',
@@ -163,10 +167,14 @@ export const NAV: NavGroup[] = [
         docPath: '/angular/deepagents/guides/threads-memory-attachments-headless',
         summary:
           'A hand-built thread list on injectThreads, and the drop-in CopilotThreadsDrawer beside a chat.',
-        status: 'partial',
+        status: 'broken',
         premium: true,
+        // Corrected 28 Aug 2026 against a live run. The previous note said the
+        // list stays empty and the drawer renders a locked state; neither is
+        // what happens. GET /api/copilotkit/threads answers 200 with a thread,
+        // the hand-built list displays it, and the drawer renders nothing at all.
         statusNote:
-          'Thread endpoints come from the Enterprise Intelligence Platform. Unlicensed, the list stays empty and the drawer renders its locked state — which is the expected result here.',
+          'The hand-built injectThreads list works — GET /api/copilotkit/threads returns a thread, shown as “Untitled conversation” because the API returns name: null. CopilotThreadsDrawer beside it renders completely empty: no list, no launcher, no locked state, no error. Creating a conversation does not persist either — the runtime reports threadEndpoints.mutations: false.',
       },
       {
         path: '/memory',
@@ -175,10 +183,13 @@ export const NAV: NavGroup[] = [
         docPath: '/angular/deepagents/guides/threads-memory-attachments-headless',
         summary:
           'injectMemories with the isAvailable() gate the guide requires before showing memory controls.',
-        status: 'partial',
+        status: 'broken',
         premium: true,
+        // Corrected 28 Aug 2026 against a live run. The previous note had this
+        // backwards: the fallback message never renders, which means the
+        // isAvailable() branch it belongs to is not the one being taken.
         statusNote:
-          'This runtime does not provide the memory routes, so isAvailable() is false and the guide’s fallback message is what renders.',
+          'app-memory-list renders nothing at all — not the memories, and not the guide’s “Memory is not available for this runtime.” fallback either. Since that fallback is the @if (!isAvailable()) branch, the gate is returning true, yet no request to any memory endpoint is ever issued. The one safeguard the guide prescribes reports the feature as available while it is not.',
       },
       {
         path: '/attachments',
