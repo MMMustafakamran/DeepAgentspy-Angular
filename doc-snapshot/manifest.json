@@ -108,7 +108,9 @@
       "sha256": "bd26054156e6b631da340e377739c1040252934f16a68a985f86a9a6cccdf03b",
       "bytes": 2961,
       "lines": 72,
-      "routes": [],
+      "routes": [
+        "/inspector"
+      ],
       "status": "ok",
       "age": 0,
       "date": "Sun, 30 Aug 2026 11:24:20 GMT"

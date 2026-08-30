@@ -28,6 +28,13 @@
  * DAPY-angular clip and its MSPY-angular counterpart carry the same index for
  * the same guide. Do not reorder without checking those.
  *
+ * `inspector` is the one entry deliberately out of nav order. The doc nav puts
+ * it in Getting Started, right after the quickstart step that links to it, and
+ * `frontend/src/app/lib/nav-config.ts` places it there. Here it is last,
+ * because slotting it in at position 3 would renumber every clip after it and
+ * break that cross-repo index agreement for a page the siblings have no
+ * counterpart for. Order in this file only decides a filename index.
+ *
  * ── The line ranges ────────────────────────────────────────────────────────
  * `startLine`/`endLine` are what the simulated IDE highlights. Unlike the
  * sibling Angular repos, this frontend brackets nothing: there are no
@@ -242,6 +249,27 @@ export const PAGES = definePages([
     ],
     prompt: 'Delete my account, but ask me to approve it first.',
     waitAfterPromptMs: 4000,
+    // Observed 30 Aug 2026 against @copilotkit/angular 0.4.0. The tool path on
+    // this page works; the defect is in the store-interrupt snippet 0.4.0 added.
+    knownIssue: {
+      area: 'Deep Agents (Angular) - Guides - Human-in-the-loop and interrupts',
+      problem:
+        'The "Handle an interrupt from the store" snippet cannot run as published. It ends with ' +
+        "`injectAgentStore(\"ticketing\")`, and no `ticketing` agent is defined anywhere in the guide, the " +
+        'quickstart, or the runtime it tells you to build. Pasted verbatim it throws during change detection: ' +
+        "`injectAgentStore: Agent 'ticketing' not found after runtime sync ... Known agents: [default, support]`. " +
+        'The page never says the string is a placeholder, and the surrounding prose reads as a complete example.',
+      impact:
+        'The newly documented way to read an interrupt is the one a reader is steered to first, and it is the ' +
+        'one that fails on paste. The rest of the page still renders, so the failure shows up only in the ' +
+        'console -- a reader watching the UI sees a panel that simply never appears and has no reason to ' +
+        'connect that to an agent id in an import-adjacent line.',
+      likelyCause:
+        'The snippet was written against a multi-agent example that is not part of this guide. Every other ' +
+        'snippet on the page uses `"default"`, which is the agent the quickstart actually registers. The ' +
+        'library itself behaves well here -- the thrown message names the known agents and what to check -- ' +
+        'so this is a documentation defect rather than a package one.',
+    },
   },
   {
     id: 'shared-state',
@@ -385,5 +413,52 @@ export const PAGES = definePages([
     endLine: 60,
     prompt: 'Tell me a short joke about Angular.',
     waitAfterPromptMs: 4000,
+  },
+  {
+    id: 'inspector',
+    name: 'Inspector',
+    videoName: 'Inspector',
+    docPath: 'inspector',
+    route: 'inspector',
+    // The subject of this page is code that is NOT here: the framework mounts
+    // cpk-web-inspector itself, so the harness must contain no Inspector
+    // mount at all. The probe is what makes that absence visible on camera --
+    // it counts the elements in the document and names which case it found.
+    ideFile: 'frontend/src/app/features/inspector/inspector-probe.component.ts',
+    startLine: 116,
+    endLine: 122,
+    extraTabs: [
+      // enableInspector is the only switch the page documents, and this
+      // provider block deliberately does not set it -- the default-on
+      // development behaviour is the state the guide describes.
+      { filePath: 'frontend/src/app/app.config.ts', startLine: 44, endLine: 66 },
+    ],
+    // The quickstart's Inspector step is not satisfied by a static panel: it
+    // asks the reader to send a message and watch AG-UI events move.
+    prompt: 'Say hello, so there is something for the Inspector to show.',
+    waitAfterPromptMs: 4000,
+    // Observed 30 Aug 2026 against @copilotkit/angular 0.4.0.
+    // Not a defect in the Inspector itself -- it works, and the framework does
+    // mount it. The gap is in what the page says is sufficient to get it.
+    knownIssue: {
+      area: 'Deep Agents (Angular) - Inspector',
+      problem:
+        'The page states that `@copilotkit/angular` mounts the Inspector for you: the CopilotKit service ' +
+        'creates `cpk-web-inspector` and appends it to `document.body` after the first browser render. In ' +
+        'practice the element appears only once something *injects* that service. On a route that has ' +
+        '`provideCopilotKit` in effect but renders no CopilotKit component, there is no Inspector and no ' +
+        'element in the document. Mounting a chat makes it appear immediately.',
+      impact:
+        'A reader who has configured `provideCopilotKit` and gone looking for the Inspector button, as the ' +
+        '"Open Inspector and confirm setup" step in the quickstart tells them to, may find nothing there and ' +
+        'conclude the setup failed. The page names no precondition, so there is nothing to check: the fix ' +
+        '-- render any CopilotKit component -- is not derivable from what is written.',
+      likelyCause:
+        'Angular constructs a root-provided service lazily, on first injection. `provideCopilotKit` only ' +
+        'registers the provider, so the `CopilotKit` service that does the appending is never constructed ' +
+        'until a component injects it. Once any consumer has mounted, the element persists for the life of ' +
+        'the document, including in-app navigation to routes that have none -- consistent with the ' +
+        'appending happening once, in the service constructor.',
+    },
   },
 ]);

@@ -43,7 +43,7 @@ export interface RouteMeta {
   status: RouteStatus;
   /** Shown in the route header when the status is not plain "working". */
   statusNote?: string;
-  /** Feature requires a CopilotKit Enterprise Intelligence license. */
+  /** Feature requires a CopilotKit Intelligence license. */
   premium?: boolean;
   /**
    * This route owns a live interactive surface, which lives at `<path>/demo`
@@ -85,6 +85,17 @@ export const NAV: NavGroup[] = [
         summary:
           'The smallest end-to-end path: a LangGraphAgent bound to the DeepAgents backend in Copilot Runtime, provideCopilotKit, and one copilot-chat.',
         status: 'working',
+      },
+      {
+        path: '/inspector',
+        hasDemo: true,
+        title: 'Inspector',
+        docPath: '/angular/deepagents/inspector',
+        summary:
+          'The Inspector the framework mounts for you, and a live check that it did.',
+        status: 'working',
+        statusNote:
+          'Added 30 Aug 2026 with @copilotkit/angular 0.4.0, which mounts cpk-web-inspector itself. This harness has no Inspector code, which is what the page is testing.',
       },
     ],
   },
@@ -141,10 +152,10 @@ export const NAV: NavGroup[] = [
         title: 'Human-in-the-loop and interrupts',
         docPath: '/angular/deepagents/guides/human-in-the-loop',
         summary:
-          'A decision tool that pauses the run until the user answers, plus a headless interrupt controller.',
-        status: 'working',
+          'A decision tool that pauses the run until the user answers, plus both documented interrupt controllers.',
+        status: 'broken',
         statusNote:
-          'The tool path is live. The interrupt panel is mounted but stays idle unless the agent emits an AG-UI interrupt.',
+          'The tool path is live and either interrupt panel — the store controller or the typed injectInterrupt one — is mounted, never both. The 0.4.0 store snippet cannot run as published: it ends with injectAgentStore("ticketing"), an agent no part of these docs defines, and throws “Agent ‘ticketing’ not found after runtime sync”. This repo passes "default" instead and reports the substitution.',
       },
       {
         path: '/shared-state',

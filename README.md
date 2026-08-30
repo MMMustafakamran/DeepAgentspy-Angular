@@ -205,7 +205,7 @@ Commit `doc-snapshot/` — `pages/`, `manifest.json` and `CHANGELOG.md` are the 
 
 **`Failed to create thread: Invalid thread ID: must be a UUID`.** Only appears when calling the runtime directly with a hand-written thread id. The chat components generate UUIDs themselves.
 
-**Threads and memory routes render a locked or empty state.** Expected. Those endpoints come from the CopilotKit Enterprise Intelligence Platform; without a license key there is nothing to list. See the per-route status notes.
+**Threads and memory routes render a locked or empty state.** Expected. Those endpoints come from the CopilotKit Intelligence Platform; without a license key there is nothing to list. See the per-route status notes.
 
 **Microphone records but transcription fails.** Expected. This runtime has no transcription service configured.
 
@@ -214,7 +214,9 @@ Commit `doc-snapshot/` — `pages/`, `manifest.json` and `CHANGELOG.md` are the 
 ## Known gaps
 
 Verified against a live run on **28 Aug 2026** (`@copilotkit/angular` 0.3.1,
-`@copilotkit/runtime` 1.67.1, `deepagents` 0.7.5). Each is recorded as a video by
+`@copilotkit/runtime` 1.67.1, `deepagents` 0.7.5). The frontend moved to
+`@copilotkit/angular` 0.4.0 on **30 Aug 2026**; the gaps below were not
+re-verified against it, and none of them is in an area 0.4.0 touched. Each is recorded as a video by
 `autorecorder/`, and the text below is generated into `DOCUMENTED_REPORT.md` from
 the same `knownIssue` objects the clips put on screen — see *Recording and CI*.
 
@@ -242,6 +244,17 @@ the same `knownIssue` objects the clips put on screen — see *Recording and CI*
   available for this runtime." fallback. Since that fallback is the
   `@if (!isAvailable())` branch, the gate is returning **true**, yet no request
   to any memory endpoint is ever issued. Tracked on `/memory`.
+- **The Inspector needs a CopilotKit consumer, which the page does not say.**
+  The Inspector page states that `@copilotkit/angular` mounts the Inspector for
+  you — the `CopilotKit` service creates `cpk-web-inspector` and appends it to
+  `document.body` after the first browser render. It appears only once something
+  **injects** that service. On a route where `provideCopilotKit` is in effect but
+  no CopilotKit component is rendered, there is no element and no Inspector
+  button; mounting a chat makes it appear at once, and it then persists for the
+  life of the document. Angular constructs a root-provided service lazily, so the
+  provider alone never constructs it. Verified 30 Aug 2026 on
+  `@copilotkit/angular` 0.4.0 — every doc route in this app reads 0 elements,
+  every demo route reads 1. Tracked on `/inspector`.
 - **`getWeather` argument mismatch.** The agent declares
   `getWeather(location: str)`, but the frontend renderer in
   `src/app/features/tools/` is written against `{ city }`. The tool call still

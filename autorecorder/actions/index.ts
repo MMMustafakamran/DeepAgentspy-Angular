@@ -47,6 +47,7 @@ import { runAttachmentsAction } from './attachments.action';
 import { runChatUiAction } from './chat-ui.action';
 import { runHeadlessAction } from './headless.action';
 import { runHitlAction } from './hitl.action';
+import { runInspectorAction } from './inspector.action';
 import { runMemoryAction } from './memory.action';
 import { runSharedStateAction } from './shared-state.action';
 import { runThreadsAction } from './threads.action';
@@ -63,6 +64,7 @@ export const ACTION_MAP: Record<string, PageActionHandler> = {
   a2ui: runA2uiAction,
   'voice-multimodal': runVoiceAction,
   'human-in-the-loop': runHitlAction,
+  inspector: runInspectorAction,
   'shared-state': runSharedStateAction,
   threads: runThreadsAction,
   memory: runMemoryAction,

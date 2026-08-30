@@ -8,7 +8,7 @@
  * A2UI, and Headless demos all drive the `default` agent and therefore show the
  * same conversation through four different interfaces.
  */
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 import { DemoFrame } from '../components/demo-frame';
 import { A2uiChatComponent } from '../features/a2ui/a2ui-chat.component';
@@ -16,6 +16,7 @@ import { MediaChatComponent } from '../features/attachments/media-chat.component
 import { ChatUiDemoComponent } from '../features/chat-ui/chat-ui-demo.component';
 import { HeadlessChatComponent } from '../features/headless/headless-chat.component';
 import { HitlChatComponent } from '../features/hitl/hitl-chat.component';
+import { InspectorProbeComponent } from '../features/inspector/inspector-probe.component';
 import { MemoryDemoComponent } from '../features/memory/memory-demo.component';
 import { VoiceChatComponent } from '../features/media/voice-chat.component';
 import { QuickstartChat } from '../features/quickstart/quickstart-chat';
@@ -74,6 +75,51 @@ export class VoiceDemo {}
   /></app-demo-frame>`,
 })
 export class HitlDemo {}
+
+/**
+ * The Inspector has no surface of its own — the framework mounts
+ * `cpk-web-inspector` on `document.body` — so this demo is a before/after of
+ * the condition that actually governs whether it appears.
+ *
+ * The chat starts UNMOUNTED on purpose. `provideCopilotKit` is already in
+ * effect at the application root, so by the guide's description the Inspector
+ * should be on screen; it is not, because nothing has injected the
+ * `CopilotKit` service yet. Mounting the chat injects it, and the mount check
+ * flips. Showing the flip is the only way to demonstrate a precondition the
+ * page does not mention, and it doubles as the quickstart's own Inspector
+ * step — "send a chat message ... events are moving" — which needs a chat.
+ *
+ * One-way by nature: once a consumer has mounted, the element stays for the
+ * life of the document, so unmounting the chat again would prove nothing.
+ */
+@Component({
+  selector: 'app-inspector-demo',
+  imports: [DemoFrame, InspectorProbeComponent, QuickstartChat],
+  template: `<app-demo-frame backTo="/inspector">
+    <div style="display: flex; flex-direction: column; height: 100%">
+      <app-inspector-probe />
+
+      @if (chatMounted()) {
+        <div style="flex: 1; min-height: 0">
+          <app-quickstart-chat />
+        </div>
+      } @else {
+        <div style="padding: 0.75rem">
+          <button
+            type="button"
+            data-testid="mount-chat"
+            (click)="chatMounted.set(true)"
+          >
+            Mount a chat (injects the CopilotKit service)
+          </button>
+        </div>
+      }
+    </div>
+  </app-demo-frame>`,
+})
+export class InspectorDemo {
+  protected readonly chatMounted = signal(false);
+}
 
 @Component({
   selector: 'app-shared-state-demo',
