@@ -246,38 +246,9 @@ export const PAGES = definePages([
     endLine: 26,
     extraTabs: [
       { filePath: 'frontend/src/app/features/hitl/approval-card.component.ts', startLine: 16, endLine: 39 },
-      // The half 0.4.0 added, and the page's defect. The range ends on
-      // `injectAgentStore('default')` -- the one line that departs from the
-      // published snippet, because the published `"ticketing"` throws.
-      {
-        filePath: 'frontend/src/app/features/hitl/store-interrupt-panel.component.ts',
-        startLine: 30,
-        endLine: 48,
-      },
     ],
     prompt: 'Delete my account, but ask me to approve it first.',
     waitAfterPromptMs: 4000,
-    // Observed 30 Aug 2026 against @copilotkit/angular 0.4.0. The tool path on
-    // this page works; the defect is in the store-interrupt snippet 0.4.0 added.
-    knownIssue: {
-      area: 'Deep Agents (Angular) - Guides - Human-in-the-loop and interrupts',
-      problem:
-        'The "Handle an interrupt from the store" snippet cannot run as published. It ends with ' +
-        "`injectAgentStore(\"ticketing\")`, and no `ticketing` agent is defined anywhere in the guide, the " +
-        'quickstart, or the runtime it tells you to build. Pasted verbatim it throws during change detection: ' +
-        "`injectAgentStore: Agent 'ticketing' not found after runtime sync ... Known agents: [default, support]`. " +
-        'The page never says the string is a placeholder, and the surrounding prose reads as a complete example.',
-      impact:
-        'The newly documented way to read an interrupt is the one a reader is steered to first, and it is the ' +
-        'one that fails on paste. The rest of the page still renders, so the failure shows up only in the ' +
-        'console -- a reader watching the UI sees a panel that simply never appears and has no reason to ' +
-        'connect that to an agent id in an import-adjacent line.',
-      likelyCause:
-        'The snippet was written against a multi-agent example that is not part of this guide. Every other ' +
-        'snippet on the page uses `"default"`, which is the agent the quickstart actually registers. The ' +
-        'library itself behaves well here -- the thrown message names the known agents and what to check -- ' +
-        'so this is a documentation defect rather than a package one.',
-    },
   },
   {
     id: 'shared-state',
@@ -448,25 +419,38 @@ export const PAGES = definePages([
     // Observed 30 Aug 2026 against @copilotkit/angular 0.4.0.
     // Not a defect in the Inspector itself -- it works, and the framework does
     // mount it. The gap is in what the page says is sufficient to get it.
-    knownIssue: {
-      area: 'Deep Agents (Angular) - Inspector',
-      problem:
-        'The page states that `@copilotkit/angular` mounts the Inspector for you: the CopilotKit service ' +
-        'creates `cpk-web-inspector` and appends it to `document.body` after the first browser render. In ' +
-        'practice the element appears only once something *injects* that service. On a route that has ' +
-        '`provideCopilotKit` in effect but renders no CopilotKit component, there is no Inspector and no ' +
-        'element in the document. Mounting a chat makes it appear immediately.',
-      impact:
-        'A reader who has configured `provideCopilotKit` and gone looking for the Inspector button, as the ' +
-        '"Open Inspector and confirm setup" step in the quickstart tells them to, may find nothing there and ' +
-        'conclude the setup failed. The page names no precondition, so there is nothing to check: the fix ' +
-        '-- render any CopilotKit component -- is not derivable from what is written.',
-      likelyCause:
-        'Angular constructs a root-provided service lazily, on first injection. `provideCopilotKit` only ' +
-        'registers the provider, so the `CopilotKit` service that does the appending is never constructed ' +
-        'until a component injects it. Once any consumer has mounted, the element persists for the life of ' +
-        'the document, including in-app navigation to routes that have none -- consistent with the ' +
-        'appending happening once, in the service constructor.',
-    },
+  },
+  {
+    id: 'interrupts',
+    name: 'Guides - Interrupts',
+    videoName: 'Interrupts',
+    docPath: 'guides/human-in-the-loop',
+    route: 'interrupts',
+    // Split out of `human-in-the-loop` on 31 Aug 2026. One doc page, two
+    // routes -- the same shape the threads/memory/attachments/headless page
+    // already has here, and for the same reason: the page teaches two things
+    // and only one of them runs against this backend.
+    //
+    // The store panel leads because it is both the half 0.4.0 added and the
+    // half that carries the defect. The range ends on
+    // `injectAgentStore('default')`, the one line that departs from the
+    // published snippet.
+    ideFile: 'frontend/src/app/features/hitl/store-interrupt-panel.component.ts',
+    startLine: 30,
+    endLine: 48,
+    extraTabs: [
+      // The older typed controller, for contrast: same job, different call.
+      {
+        filePath: 'frontend/src/app/features/hitl/interrupt-panel.component.ts',
+        startLine: 36,
+        endLine: 56,
+      },
+    ],
+    // Nothing here depends on a reply -- an interrupt is raised by the backend,
+    // not the model -- but the take still sends one so the run is live while
+    // the controllers are on screen.
+    prompt: 'Say hello.',
+    waitAfterPromptMs: 3000,
+    // Observed 30 Aug 2026 against @copilotkit/angular 0.4.0.
   },
 ]);

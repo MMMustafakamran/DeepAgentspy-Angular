@@ -16,6 +16,7 @@ import { MediaChatComponent } from '../features/attachments/media-chat.component
 import { ChatUiDemoComponent } from '../features/chat-ui/chat-ui-demo.component';
 import { HeadlessChatComponent } from '../features/headless/headless-chat.component';
 import { HitlChatComponent } from '../features/hitl/hitl-chat.component';
+import { InterruptsChatComponent } from '../features/hitl/interrupts-chat.component';
 import { InspectorProbeComponent } from '../features/inspector/inspector-probe.component';
 import { MemoryDemoComponent } from '../features/memory/memory-demo.component';
 import { VoiceChatComponent } from '../features/media/voice-chat.component';
@@ -75,6 +76,20 @@ export class VoiceDemo {}
   /></app-demo-frame>`,
 })
 export class HitlDemo {}
+
+/**
+ * The interrupt half of the same doc page, on its own route. Split from the
+ * tool demo because only the tool actually runs here -- the two were sharing a
+ * frame in which one surface was permanently blank.
+ */
+@Component({
+  selector: 'app-interrupts-demo',
+  imports: [DemoFrame, InterruptsChatComponent],
+  template: `<app-demo-frame backTo="/interrupts"
+    ><app-interrupts-chat
+  /></app-demo-frame>`,
+})
+export class InterruptsDemo {}
 
 /**
  * The Inspector has no surface of its own — the framework mounts

@@ -65,8 +65,8 @@ export const runInspectorAction: PageActionHandler = async (
     );
     await showCaption(
       page,
-      'provideCopilotKit is already configured — and there is no Inspector',
-      'bad',
+      'Configured, but no CopilotKit component on the route yet — no Inspector',
+      'neutral',
     );
   } else {
     // Not the expected starting point, so say so rather than narrating a

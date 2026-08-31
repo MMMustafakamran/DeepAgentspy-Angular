@@ -38,6 +38,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/demos').then((m) => m.InspectorDemo),
   },
   {
+    path: 'interrupts/demo',
+    loadComponent: () => import('./pages/demos').then((m) => m.InterruptsDemo),
+  },
+  {
     path: 'shared-state/demo',
     loadComponent: () => import('./pages/demos').then((m) => m.SharedStateDemo),
   },
@@ -80,6 +84,7 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/human-in-the-loop'),
       },
       { path: 'inspector', loadComponent: () => import('./pages/inspector') },
+      { path: 'interrupts', loadComponent: () => import('./pages/interrupts') },
       {
         path: 'shared-state',
         loadComponent: () => import('./pages/shared-state'),

@@ -244,17 +244,6 @@ the same `knownIssue` objects the clips put on screen — see *Recording and CI*
   available for this runtime." fallback. Since that fallback is the
   `@if (!isAvailable())` branch, the gate is returning **true**, yet no request
   to any memory endpoint is ever issued. Tracked on `/memory`.
-- **The Inspector needs a CopilotKit consumer, which the page does not say.**
-  The Inspector page states that `@copilotkit/angular` mounts the Inspector for
-  you — the `CopilotKit` service creates `cpk-web-inspector` and appends it to
-  `document.body` after the first browser render. It appears only once something
-  **injects** that service. On a route where `provideCopilotKit` is in effect but
-  no CopilotKit component is rendered, there is no element and no Inspector
-  button; mounting a chat makes it appear at once, and it then persists for the
-  life of the document. Angular constructs a root-provided service lazily, so the
-  provider alone never constructs it. Verified 30 Aug 2026 on
-  `@copilotkit/angular` 0.4.0 — every doc route in this app reads 0 elements,
-  every demo route reads 1. Tracked on `/inspector`.
 - **`getWeather` argument mismatch.** The agent declares
   `getWeather(location: str)`, but the frontend renderer in
   `src/app/features/tools/` is written against `{ city }`. The tool call still

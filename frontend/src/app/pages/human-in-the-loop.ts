@@ -49,6 +49,7 @@ import { Callout, Panel, SourceCode, TryIt } from '../components/ui';
               <td class="py-2">
                 <code>AgentStore.interruptController</code>,
                 <code>injectInterrupt</code>
+                <a class="ml-1 underline" href="/interrupts">(own route)</a>
               </td>
             </tr>
           </tbody>
@@ -88,50 +89,15 @@ import { Callout, Panel, SourceCode, TryIt } from '../components/ui';
         the agent with no frontend handler registered will hang the run.
       </ui-callout>
 
-      <ui-panel heading="The interrupt controller on the store">
-        <p class="mb-3 text-sm text-slate-700">
-          Added by <code>&#64;copilotkit/angular</code> 0.4.0. The store that
-          already exposes a conversation's messages and state exposes its
-          pending interrupt too, on
-          <code>store().interruptController</code>, so a component holding a
-          store needs nothing else. It is created and connected with the store
-          and destroyed when the store is torn down or replaced.
+      <ui-panel heading="The other half of this doc page">
+        <p class="text-sm text-slate-700">
+          The same guide's interrupt path — where the backend agent, not the
+          model, chooses the pause — is at
+          <a class="underline" href="/interrupts">/interrupts</a>. It covers
+          both controllers 0.4.0 documents, and carries this doc page's defect.
         </p>
-        <ui-source
-          path="src/app/features/hitl/store-interrupt-panel.component.ts"
-        />
       </ui-panel>
 
-      <ui-panel heading="The typed interrupt controller">
-        <p class="mb-3 text-sm text-slate-700">
-          <code>injectInterrupt</code> is the escape hatch for when the store
-          default is not enough — a typed payload, an <code>enabled</code>
-          filter, or a <code>handler</code> that prepares data for the view. As
-          of 0.4.0 it takes the agent id positionally,
-          <code>injectInterrupt&lt;T&gt;('default')</code>; the original
-          <code>{{ '{' }} agentId {{ '}' }}</code> object is still accepted by a
-          compatibility overload, so the change does not break existing code.
-        </p>
-        <p class="mb-3 text-sm text-slate-700">
-          Both panels are headless — they render nothing until the backend emits
-          an AG-UI interrupt (or the legacy <code>on_interrupt</code> custom
-          event). The DeepAgents agent in this repo does not emit one, so this
-          half of the guide stays idle either way. The controller clears stale
-          decisions when the thread changes, and
-          <code>resolve</code>/<code>cancel</code> share one in-flight resume
-          promise so a double click cannot start two resume runs.
-        </p>
-        <ui-source path="src/app/features/hitl/interrupt-panel.component.ts" />
-      </ui-panel>
-
-      <ui-callout title="Do not render both controllers for the same decision">
-        The guide warns that a store controller and an
-        <code>injectInterrupt</code> controller observe the agent
-        independently, so one interrupt becomes visible in both and two UI
-        actions could attempt to resume the same run. The demo enforces this
-        rather than describing it: a switch above the chat mounts exactly one
-        panel at a time, so the unsupported state is never reachable.
-      </ui-callout>
     </div>
   `,
 })

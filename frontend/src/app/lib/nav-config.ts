@@ -95,7 +95,7 @@ export const NAV: NavGroup[] = [
           'The Inspector the framework mounts for you, and a live check that it did.',
         status: 'working',
         statusNote:
-          'Added 30 Aug 2026 with @copilotkit/angular 0.4.0, which mounts cpk-web-inspector itself. This harness has no Inspector code, which is what the page is testing.',
+          'Added 30 Aug 2026 with @copilotkit/angular 0.4.0, which mounts cpk-web-inspector itself. This harness has no Inspector code, which is what the page is testing. The element appears once a CopilotKit component is on the route, so the demo mounts a chat to show it arrive.',
       },
     ],
   },
@@ -152,10 +152,19 @@ export const NAV: NavGroup[] = [
         title: 'Human-in-the-loop and interrupts',
         docPath: '/angular/deepagents/guides/human-in-the-loop',
         summary:
-          'A decision tool that pauses the run until the user answers, plus both documented interrupt controllers.',
-        status: 'broken',
+          'A decision tool that pauses the run until the user answers.',
+        status: 'working',
+      },
+      {
+        path: '/interrupts',
+        hasDemo: true,
+        title: 'Interrupts',
+        docPath: '/angular/deepagents/guides/human-in-the-loop',
+        summary:
+          'The two interrupt controllers 0.4.0 documents, and the published snippet that cannot run.',
+        status: 'partial',
         statusNote:
-          'The tool path is live and either interrupt panel — the store controller or the typed injectInterrupt one — is mounted, never both. The 0.4.0 store snippet cannot run as published: it ends with injectAgentStore("ticketing"), an agent no part of these docs defines, and throws “Agent ‘ticketing’ not found after runtime sync”. This repo passes "default" instead and reports the substitution.',
+          'Split from /human-in-the-loop on 31 Aug 2026: only the tool half runs here, so the two shared a frame in which one surface was always blank. Both controllers are mounted and listening, but this backend emits no AG-UI interrupt, so neither ever renders — the half cannot be exercised here. The guide writes injectAgentStore("ticketing"), an agent these docs never define, so the route passes "default" and notes the swap on the page.',
       },
       {
         path: '/shared-state',
