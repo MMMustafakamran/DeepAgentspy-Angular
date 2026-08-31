@@ -76,8 +76,20 @@ export const runInspectorAction: PageActionHandler = async (
       console.warn(`   ⚠️ The mount check never settled, so nothing was confirmed.`);
   }
 
-  // Open the Inspector itself — the actual subject of the page, and what the
-  // quickstart's closing step tells a reader to click.
+  // The message goes first, for two reasons: the documented step is "send a
+  // chat message ... events are moving", so there has to be traffic before
+  // the Inspector has anything to show -- and the Inspector panel overlays
+  // the composer once open, so a prompt typed afterwards cannot reach it.
+  console.log(`   💬 Sending a message so the Inspector has traffic to show...`);
+  const msgCount = await sendPrompt(page, config.prompt);
+  await waitForAgentResponseCompletion(
+    page,
+    config.waitAfterPromptMs ?? 4000,
+    msgCount,
+  );
+
+  // Now open it, with a run already behind us so the panes have content.
+  // Nothing is sent after this point: the panel covers the composer.
   const inspector = page.locator('cpk-web-inspector').first();
   const inspectorBox = await inspector.boundingBox().catch(() => null);
   if (inspectorBox && inspectorBox.width > 0 && inspectorBox.height > 0) {
@@ -98,13 +110,4 @@ export const runInspectorAction: PageActionHandler = async (
     );
   }
 
-  // The quickstart's step is not satisfied by a static panel: it asks for a
-  // message, so AG-UI events have something to carry.
-  console.log(`   💬 Sending a message so the Inspector has traffic to show...`);
-  const msgCount = await sendPrompt(page, config.prompt);
-  await waitForAgentResponseCompletion(
-    page,
-    config.waitAfterPromptMs ?? 4000,
-    msgCount,
-  );
 };
