@@ -287,6 +287,30 @@ export const PAGES = definePages([
       'what is my timezone?',
     ],
     waitAfterPromptMs: 4000,
+    // Observed 31 Aug 2026 against @copilotkit/angular 0.4.0 / runtime 1.67.1,
+    // by reading the POST body the browser sends to /api/copilotkit.
+    knownIssue: {
+      area: 'Deep Agents (Angular) - Guides - Shared state and agent context',
+      problem:
+        'Neither shared state nor agent context reaches the model. Setting priority through ' +
+        '`agent.setState` updates the store and the UI renders "Priority: high", and the account panel ' +
+        'publishes a timezone through `connectAgentContext` exactly as the guide writes it. Asking the agent ' +
+        '"what is priority set as?" returns a request for clarification, and "what is my timezone?" returns ' +
+        '"I do not have access to your location or timezone".',
+      impact:
+        'The whole page is unusable as documented: both halves of the guide -- read/write shared state and ' +
+        'read-only context -- appear to work in the browser while the agent is blind to them. Nothing errors, ' +
+        'so a reader gets a UI that updates correctly and an agent that silently ignores it.',
+      likelyCause:
+        'Not the frontend. The run input the browser POSTs to /api/copilotkit already carries both: ' +
+        '`state: {"priority":"high"}` and `context: [{"description":"Current account and timezone", ' +
+        '"value":"{\\"userName\\":\\"Ada\\",\\"timezone\\":\\"America/Los_Angeles\\"}"}]`. ' +
+        'So `agent.setState` and `connectAgentContext` both do their job. The loss is server-side: ' +
+        '`backend/main.py` builds the agent with `create_deep_agent(..., middleware=[CopilotKitMiddleware()])`, ' +
+        'which is what should surface those fields to the model, and the model still never sees them. Either ' +
+        'the middleware does not fold context/state into the prompt for a DeepAgents graph, or the Angular ' +
+        'guide omits a step that puts them there.',
+    },
   },
 
   // ── Threads, memory, attachments, headless ───────────────────────────────

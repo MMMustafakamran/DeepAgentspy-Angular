@@ -164,7 +164,9 @@ export const NAV: NavGroup[] = [
         docPath: '/angular/deepagents/guides/shared-state',
         summary:
           'Reading and writing agent state through injectAgentStore, and publishing read-only app context two ways.',
-        status: 'working',
+        status: 'broken',
+        statusNote:
+          'The browser half works: agent.setState updates the store, the UI renders the new priority, and both context panels publish. The run input POSTed to /api/copilotkit carries state and context correctly — and the agent still answers as though neither exists. Verified 31 Aug 2026 by reading the request body.',
       },
     ],
   },
