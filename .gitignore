@@ -55,10 +55,10 @@ DOCUMENTED_REPORT.md
 # all committed, so this block alone changes nothing. To actually drop them:
 #   git rm -r --cached .github/workflows ci/automate.mjs ci/run-name.mjs \
 #     ci/resolve-se =lection.mjs ci/list-pages.mjs ci/validate-pages.mjs
-.github/workflows/
-ci/automate.mjs
-ci/run-name.mjs
-ci/resolve-selection.mjs
-ci/list-pages.mjs
-ci/validate-pages.mjs
-.github/
+#.github/workflows/
+#ci/automate.mjs
+#ci/run-name.mjs
+#ci/resolve-selection.mjs
+#ci/list-pages.mjs
+#ci/validate-pages.mjs
+#.github/
