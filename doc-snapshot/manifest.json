@@ -58,8 +58,7 @@
       "bytes": 8992,
       "lines": 274,
       "routes": [
-        "/human-in-the-loop",
-        "/interrupts"
+        "/human-in-the-loop"
       ],
       "status": "ok",
       "age": 0,

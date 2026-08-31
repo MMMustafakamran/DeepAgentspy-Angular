@@ -246,6 +246,15 @@ export const PAGES = definePages([
     endLine: 26,
     extraTabs: [
       { filePath: 'frontend/src/app/features/hitl/approval-card.component.ts', startLine: 16, endLine: 39 },
+      // The other half of the page: the store interrupt controller 0.4.0 added.
+      // The range ends on `injectAgentStore('default')`, the one line that
+      // departs from the published snippet -- the guide's `"ticketing"` names
+      // an agent these docs never define.
+      {
+        filePath: 'frontend/src/app/features/hitl/store-interrupt-panel.component.ts',
+        startLine: 30,
+        endLine: 48,
+      },
     ],
     prompt: 'Delete my account, but ask me to approve it first.',
     waitAfterPromptMs: 4000,
@@ -419,38 +428,5 @@ export const PAGES = definePages([
     // Observed 30 Aug 2026 against @copilotkit/angular 0.4.0.
     // Not a defect in the Inspector itself -- it works, and the framework does
     // mount it. The gap is in what the page says is sufficient to get it.
-  },
-  {
-    id: 'interrupts',
-    name: 'Guides - Interrupts',
-    videoName: 'Interrupts',
-    docPath: 'guides/human-in-the-loop',
-    route: 'interrupts',
-    // Split out of `human-in-the-loop` on 31 Aug 2026. One doc page, two
-    // routes -- the same shape the threads/memory/attachments/headless page
-    // already has here, and for the same reason: the page teaches two things
-    // and only one of them runs against this backend.
-    //
-    // The store panel leads because it is both the half 0.4.0 added and the
-    // half that carries the defect. The range ends on
-    // `injectAgentStore('default')`, the one line that departs from the
-    // published snippet.
-    ideFile: 'frontend/src/app/features/hitl/store-interrupt-panel.component.ts',
-    startLine: 30,
-    endLine: 48,
-    extraTabs: [
-      // The older typed controller, for contrast: same job, different call.
-      {
-        filePath: 'frontend/src/app/features/hitl/interrupt-panel.component.ts',
-        startLine: 36,
-        endLine: 56,
-      },
-    ],
-    // Nothing here depends on a reply -- an interrupt is raised by the backend,
-    // not the model -- but the take still sends one so the run is live while
-    // the controllers are on screen.
-    prompt: 'Say hello.',
-    waitAfterPromptMs: 3000,
-    // Observed 30 Aug 2026 against @copilotkit/angular 0.4.0.
   },
 ]);

@@ -30,8 +30,7 @@
 import { type Page } from 'playwright';
 
 import { AgentSilentError, sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
-import { writeIssueNote } from '../core/issue-note';
-import { showCaption } from '../core/overlays/caption';
+import { writeScratchNote } from './scratch-note';
 import { humanGlide, sleep } from '../core/overlays/cursor';
 import {
   captureConsole,
@@ -64,7 +63,6 @@ export const runA2uiAction: PageActionHandler = async (
   const capture = captureConsole(page);
 
   try {
-    await showCaption(page, 'A2UI — asking the agent for a rendered flight card', 'bad');
 
     console.log(`   🎨 Asking for declarative UI: ${config.prompt}`);
     const msgCount = await sendPrompt(page, config.prompt, { timeoutMs: 12000 });
@@ -89,18 +87,12 @@ export const runA2uiAction: PageActionHandler = async (
       console.log(
         `   ✅ ${rendered} A2UI element(s) rendered — a catalog is registered after all.`,
       );
-      await showCaption(
-        page,
-        'A2UI rendered a surface — this page’s known issue looks fixed',
-        'good',
-      );
       await humanGlide(page, 960, 460, 20);
       await sleep(5000);
       return;
     }
 
     // ── Nothing was drawn. Which of the two failures is it? ────────────────
-    await showCaption(page, 'No surface was drawn — the answer came back as prose', 'bad');
 
     // Rest where the surface should have been, so the absence is deliberate
     // footage rather than an idle pause.
@@ -111,7 +103,6 @@ export const runA2uiAction: PageActionHandler = async (
       console.log(
         `   🐞 ${catalogErrors.length} catalog error(s) in the console — opening DevTools.`,
       );
-      await showCaption(page, 'The browser console, where the failure actually is', 'bad');
       await openDevTools(page, 'Console');
       await showConsoleEntries(page, catalogErrors);
       await closeDevTools(page, 3500);
@@ -119,16 +110,22 @@ export const runA2uiAction: PageActionHandler = async (
       // No error anywhere: the renderer simply never activated. Opening an
       // empty console here would imply an error that does not exist.
       console.log(`   · No catalog error logged — the renderer is inert, not failing.`);
-      await showCaption(
-        page,
-        'Nothing was logged either — the renderer never activated at all',
-        'bad',
-      );
       await sleep(3000);
     }
 
     if (config.knownIssue) {
-      await writeIssueNote(page, config.id, config.knownIssue);
+      await writeScratchNote(page, 'a2ui.txt', [
+      'a2ui',
+      '',
+      'asked for a rendered card and got plain prose',
+      'no component no error nothing in the console',
+      '',
+      'react build of this same guide at least logs',
+      'catalog not found - here its just silent',
+      '',
+      'renderer never turns on - needs a2ui catalog',
+      'and the guides catalog snippet isnt self contained',
+    ]);
     }
   } finally {
     capture.stop();

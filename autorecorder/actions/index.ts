@@ -28,8 +28,10 @@
  * `a2ui`, `voice-multimodal`, `threads` and `memory` carry a `knownIssue` in
  * pages.config.ts and their handlers exist to make the defect *visible*: an
  * absence looks identical to a slow page on video unless something on screen
- * says otherwise. Each ends by calling `writeIssueNote`, which types the same
- * KnownIssue object that `ci/build-report.mjs` renders into the daily report.
+ * says otherwise. Each ends by jotting a short informal note with
+ * `writeScratchNote` -- the formal KnownIssue still goes to the report via
+ * `ci/build-report.mjs`, but a person mid-test does not type finished prose,
+ * so the two were deliberately decoupled. See `actions/scratch-note.ts`.
  *
  * They also all tolerate agent silence rather than letting it abort the take —
  * whether the agent additionally failed to answer is not the finding, and
@@ -48,7 +50,6 @@ import { runChatUiAction } from './chat-ui.action';
 import { runHeadlessAction } from './headless.action';
 import { runHitlAction } from './hitl.action';
 import { runInspectorAction } from './inspector.action';
-import { runInterruptsAction } from './interrupts.action';
 import { runMemoryAction } from './memory.action';
 import { runSharedStateAction } from './shared-state.action';
 import { runThreadsAction } from './threads.action';
@@ -66,7 +67,6 @@ export const ACTION_MAP: Record<string, PageActionHandler> = {
   'voice-multimodal': runVoiceAction,
   'human-in-the-loop': runHitlAction,
   inspector: runInspectorAction,
-  interrupts: runInterruptsAction,
   'shared-state': runSharedStateAction,
   threads: runThreadsAction,
   memory: runMemoryAction,

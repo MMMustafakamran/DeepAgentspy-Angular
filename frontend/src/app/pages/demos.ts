@@ -8,7 +8,7 @@
  * A2UI, and Headless demos all drive the `default` agent and therefore show the
  * same conversation through four different interfaces.
  */
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { DemoFrame } from '../components/demo-frame';
 import { A2uiChatComponent } from '../features/a2ui/a2ui-chat.component';
@@ -16,7 +16,6 @@ import { MediaChatComponent } from '../features/attachments/media-chat.component
 import { ChatUiDemoComponent } from '../features/chat-ui/chat-ui-demo.component';
 import { HeadlessChatComponent } from '../features/headless/headless-chat.component';
 import { HitlChatComponent } from '../features/hitl/hitl-chat.component';
-import { InterruptsChatComponent } from '../features/hitl/interrupts-chat.component';
 import { InspectorProbeComponent } from '../features/inspector/inspector-probe.component';
 import { MemoryDemoComponent } from '../features/memory/memory-demo.component';
 import { VoiceChatComponent } from '../features/media/voice-chat.component';
@@ -77,35 +76,16 @@ export class VoiceDemo {}
 })
 export class HitlDemo {}
 
-/**
- * The interrupt half of the same doc page, on its own route. Split from the
- * tool demo because only the tool actually runs here -- the two were sharing a
- * frame in which one surface was permanently blank.
- */
-@Component({
-  selector: 'app-interrupts-demo',
-  imports: [DemoFrame, InterruptsChatComponent],
-  template: `<app-demo-frame backTo="/interrupts"
-    ><app-interrupts-chat
-  /></app-demo-frame>`,
-})
-export class InterruptsDemo {}
 
 /**
  * The Inspector has no surface of its own — the framework mounts
- * `cpk-web-inspector` on `document.body` — so this demo is a before/after of
- * the condition that actually governs whether it appears.
+ * `cpk-web-inspector` on `document.body` once a CopilotKit component is on the
+ * route, so the chat below is what brings it into existence.
  *
- * The chat starts UNMOUNTED on purpose. `provideCopilotKit` is already in
- * effect at the application root, so by the guide's description the Inspector
- * should be on screen; it is not, because nothing has injected the
- * `CopilotKit` service yet. Mounting the chat injects it, and the mount check
- * flips. Showing the flip is the only way to demonstrate a precondition the
- * page does not mention, and it doubles as the quickstart's own Inspector
- * step — "send a chat message ... events are moving" — which needs a chat.
- *
- * One-way by nature: once a consumer has mounted, the element stays for the
- * life of the document, so unmounting the chat again would prove nothing.
+ * The chat is mounted from the start. An earlier version gated it behind a
+ * "mount a chat" button to show the element appearing, but a button that exists
+ * only to prove a framework internal is not something a person testing this
+ * page would ever click — the point is whether the Inspector is simply there.
  */
 @Component({
   selector: 'app-inspector-demo',
@@ -113,28 +93,13 @@ export class InterruptsDemo {}
   template: `<app-demo-frame backTo="/inspector">
     <div style="display: flex; flex-direction: column; height: 100%">
       <app-inspector-probe />
-
-      @if (chatMounted()) {
-        <div style="flex: 1; min-height: 0">
-          <app-quickstart-chat />
-        </div>
-      } @else {
-        <div style="padding: 0.75rem">
-          <button
-            type="button"
-            data-testid="mount-chat"
-            (click)="chatMounted.set(true)"
-          >
-            Mount a chat (injects the CopilotKit service)
-          </button>
-        </div>
-      }
+      <div style="flex: 1; min-height: 0">
+        <app-quickstart-chat />
+      </div>
     </div>
   </app-demo-frame>`,
 })
-export class InspectorDemo {
-  protected readonly chatMounted = signal(false);
-}
+export class InspectorDemo {}
 
 @Component({
   selector: 'app-shared-state-demo',

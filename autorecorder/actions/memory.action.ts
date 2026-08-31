@@ -26,8 +26,7 @@
 import { type Page } from 'playwright';
 
 import { AgentSilentError, sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
-import { writeIssueNote } from '../core/issue-note';
-import { showCaption } from '../core/overlays/caption';
+import { writeScratchNote } from './scratch-note';
 import { humanGlide, sleep } from '../core/overlays/cursor';
 import { type PageActionHandler, type PageRecordConfig } from '../core/types';
 
@@ -51,7 +50,6 @@ export const runMemoryAction: PageActionHandler = async (
   await sleep(600);
 
   // ── The gate, rendered ────────────────────────────────────────────────────
-  await showCaption(page, 'Memory — the injectMemories panel, after full load', 'bad');
 
   const fallback = page.locator(MEMORY_LIST).first();
   const box = await fallback.boundingBox().catch(() => null);
@@ -73,20 +71,10 @@ export const runMemoryAction: PageActionHandler = async (
   // Which branch ran is the whole finding, so it is stated on screen rather
   // than left for the viewer to infer from an empty box.
   if (!rendered) {
-    await showCaption(
-      page,
-      'Empty — not even the "not available" fallback, so isAvailable() returned true',
-      'bad',
-    );
     await sleep(3200);
   } else if (FALLBACK_COPY.test(rendered)) {
     // The documented behaviour after all. Worth saying plainly, because it
     // means the gate works here and the finding needs re-wording.
-    await showCaption(
-      page,
-      'The guide’s fallback rendered — isAvailable() returned false',
-      'bad',
-    );
     await sleep(3000);
   }
 
@@ -94,13 +82,11 @@ export const runMemoryAction: PageActionHandler = async (
   if (memoryItems > 0) {
     // The gate opened. Say so rather than narrating a defect that is gone.
     console.log(`   ✅ ${memoryItems} memory item(s) rendered — this finding looks stale.`);
-    await showCaption(page, 'Memory rendered items — this page’s known issue looks fixed', 'good');
     await sleep(4000);
     return;
   }
 
   // ── Ask it to remember, then ask it back ─────────────────────────────────
-  await showCaption(page, 'Asking the agent to remember something anyway', 'bad');
   const firstCount = await sendPrompt(page, config.prompt);
   try {
     await waitForAgentResponseCompletion(page, wait, firstCount);
@@ -108,13 +94,23 @@ export const runMemoryAction: PageActionHandler = async (
     if (!(e instanceof AgentSilentError)) throw e;
   }
 
-  await showCaption(page, 'Nothing was stored — the list is still empty', 'bad');
   if (box) {
     await humanGlide(page, box.x + Math.min(box.width / 2, 220), box.y + box.height / 2, 22);
     await sleep(2600);
   }
 
   if (config.knownIssue) {
-    await writeIssueNote(page, config.id, config.knownIssue);
+    await writeScratchNote(page, 'memory.txt', [
+      'memory',
+      '',
+      'app-memory-list draws nothing',
+      'not the memories and not the fallback text either',
+      '',
+      'that fallback is the not-isAvailable branch',
+      'so isAvailable is coming back true',
+      'but nothing ever hits a memory endpoint',
+      '',
+      'so the one guard the guide tells you to add lies',
+    ]);
   }
 };

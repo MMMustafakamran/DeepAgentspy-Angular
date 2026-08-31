@@ -21,8 +21,7 @@
 import { type Page } from 'playwright';
 
 import { AgentSilentError, sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
-import { writeIssueNote } from '../core/issue-note';
-import { showCaption } from '../core/overlays/caption';
+import { writeScratchNote } from './scratch-note';
 import { humanClick, humanGlide, sleep } from '../core/overlays/cursor';
 import { type PageActionHandler, type PageRecordConfig } from '../core/types';
 
@@ -58,7 +57,6 @@ export const runThreadsAction: PageActionHandler = async (
   await sleep(600);
 
   // ── The headless list, which WORKS ───────────────────────────────────────
-  await showCaption(page, 'The hand-built injectThreads list — this one works', 'good');
 
   // Rest on the list first. A thread rendered here is the evidence that the
   // endpoint returns data, and it has to be legible before the camera moves to
@@ -89,16 +87,10 @@ export const runThreadsAction: PageActionHandler = async (
     'Retry',
   );
   if (retried) {
-    await showCaption(page, 'Listing errored — retrying changes nothing', 'bad');
     await sleep(2200);
   }
 
   // ── The drop-in drawer, which renders nothing ────────────────────────────
-  await showCaption(
-    page,
-    'The drop-in CopilotThreadsDrawer — same data, same page, renders empty',
-    'bad',
-  );
   const drawer = page.locator('copilot-threads-drawer').first();
   const drawerText = ((await drawer.innerText().catch(() => '')) || '').trim();
   console.log(
@@ -130,7 +122,6 @@ export const runThreadsAction: PageActionHandler = async (
 
   // ── The chat beside it is unaffected ──────────────────────────────────────
   console.log(`   💬 The chat beside the drawer is unaffected by the licence...`);
-  await showCaption(page, 'The agent chat beside it answers normally', 'good');
 
   const msgCount = await sendPrompt(page, config.prompt, {
     inputSelector: 'app-conversations textarea',
@@ -145,6 +136,17 @@ export const runThreadsAction: PageActionHandler = async (
 
   // ── The finding, with both halves still on screen ────────────────────────
   if (config.knownIssue) {
-    await writeIssueNote(page, config.id, config.knownIssue);
+    await writeScratchNote(page, 'threads.txt', [
+      'threads',
+      '',
+      'hand built list works - it shows a thread',
+      'name comes back null so it says untitled conversation',
+      '',
+      'the drawer next to it renders nothing at all',
+      'no list no launcher no locked state no error',
+      '',
+      'new conversation doesnt stick either',
+      'runtime says threadEndpoints mutations false',
+    ]);
   }
 };

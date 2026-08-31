@@ -1,148 +1,43 @@
 /**
- * Voice and multimodal input — the image half works, the voice half does not.
+ * Voice and multimodal input — the microphone is real, the transcription is not.
  *
  * https://docs.copilotkit.ai/angular/deepagents/guides/voice-multimodal
  *
- * The QA report marks this page failed, and the tester's own recording is
- * specific about why: the attached image is understood, and the spoken prompt
- * is never transcribed. A clip that only films the microphone failing loses
- * half of that finding and invites the obvious wrong conclusion — that the
- * whole page is broken, or that the model is at fault.
+ * This take is the voice path only. It used to open by attaching an image and
+ * reach the microphone afterwards, which made the clip look like a page about
+ * file uploads — and when the mic control was slow to appear, the take ended
+ * having never clicked it. Attachments have their own page and their own
+ * recording; the finding here is transcription, so nothing competes with it.
  *
- * So this take runs in that order on purpose:
+ * Three things have to be arranged before the page films as it behaves:
  *
- *   1. attach an image and have the agent read a value only visible inside it
- *      — proof the multimodal path is live end to end;
- *   2. record through the microphone and stop, which is the request that has
- *      no service behind it;
- *   3. write the finding while the failure is still on screen.
+ * 1. **The permission prompt.** Chrome's real one is browser chrome, outside
+ *    the page, and Playwright suppresses it — a context grants or denies up
+ *    front, so nothing was ever on screen and the mic click looked inert. The
+ *    bubble here is drawn into the page, the same way this suite already draws
+ *    the taskbar and VS Code. It is a prop, and the sequence is honest because
+ *    the stream genuinely waits for the Allow click.
  *
- * Three things have to be arranged before step 2 films as it behaves:
+ * 2. **A device.** The recording machine may have no microphone, and Chrome
+ *    then rejects `getUserMedia` instantly — so the composer never enters its
+ *    recording state and there is nothing to see. `getUserMedia` is wrapped to
+ *    fall back to a synthesized stream, so the *UI* path is exercised for real
+ *    even where the hardware is absent.
  *
- * - **The permission prompt.** Chrome's real one is browser chrome, outside the
- *   page, and Playwright suppresses it — a context grants or denies up front,
- *   so nothing was ever on screen and the mic click looked like it did nothing.
- *   The bubble here is drawn into the page, the same way this suite already
- *   draws the taskbar and VS Code. It is a prop, and the sequence is honest
- *   because the stream genuinely waits for the Allow click.
- *
- * - **A device.** The recording machine may have no microphone, and Chrome then
- *   rejects `getUserMedia` instantly — so the composer never enters its
- *   recording state and there is nothing to see. `getUserMedia` is wrapped to
- *   fall back to a synthesized stream, so the *UI* path is exercised for real
- *   even where the hardware is absent.
- *
- * - **The failure that is the actual finding.** Stopping the recording posts
- *   the audio for transcription, and this runtime configures no transcription
- *   service, so that request fails.
+ * 3. **The failure that is the actual finding.** Once recording stops, the
+ *    composer posts the audio for transcription, and this runtime configures no
+ *    transcription service — so that request fails by design. The note says so
+ *    while the empty composer is still on screen, and the turn is then finished
+ *    by keyboard, so the video ends on a real agent reply rather than a dead
+ *    stack.
  */
-import { type FileChooser, type Page } from 'playwright';
+import { type Page } from 'playwright';
 
-import { AgentSilentError, sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
-import { writeIssueNote } from '../core/issue-note';
-import { showCaption } from '../core/overlays/caption';
+import { sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
 import { humanClick, humanGlide, sleep } from '../core/overlays/cursor';
 import { type PageActionHandler, type PageRecordConfig } from '../core/types';
 
-import { closeFileDialog, openFileDialog, pickFileInDialog } from './file-dialog';
-
-const FIXTURE_NAME = 'quarterly_revenue.png';
-
-/** Draws the fixture chart in the page and returns its bytes. */
-async function renderFixture(page: Page): Promise<Buffer> {
-  const dataUrl = await page.evaluate(() => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 640;
-    canvas.height = 400;
-    const g = canvas.getContext('2d')!;
-    g.fillStyle = '#ffffff';
-    g.fillRect(0, 0, 640, 400);
-    g.fillStyle = '#111827';
-    g.font = 'bold 30px sans-serif';
-    g.fillText('Quarterly revenue', 30, 52);
-
-    const values = [120, 180, 240, 300];
-    values.forEach((v, i) => {
-      g.fillStyle = '#2563eb';
-      g.fillRect(40 + i * 150, 380 - v, 100, v);
-      g.fillStyle = '#111827';
-      g.font = '20px sans-serif';
-      g.fillText(`Q${i + 1} ${v}`, 44 + i * 150, 372 - v);
-    });
-    return canvas.toDataURL('image/png');
-  });
-
-  return Buffer.from(dataUrl.split(',')[1], 'base64');
-}
-
-/**
- * Attaches the fixture through the composer, on camera.
- *
- * Returns false rather than throwing: the voice finding is what this page is
- * for, and losing the take because the attachment menu moved would throw away
- * the more important half.
- */
-async function attachImage(page: Page): Promise<boolean> {
-  const buffer = await renderFixture(page);
-
-  let resolveChooser: ((fc: FileChooser) => void) | undefined;
-  const chooserReady = new Promise<FileChooser>((resolve) => {
-    resolveChooser = resolve;
-  });
-  page.once('filechooser', (fc) => resolveChooser?.(fc));
-
-  const addBtn = page
-    .locator('button[aria-label*="Add photos or files" i], .cdk-menu-trigger')
-    .first();
-  const addBox = await addBtn
-    .waitFor({ state: 'visible', timeout: 8000 })
-    .then(() => addBtn.boundingBox())
-    .catch(() => null);
-
-  if (!addBox) {
-    console.warn(`   ⚠️ Attachment control not found — skipping the image half.`);
-    return false;
-  }
-
-  console.log(`   📎 Opening the attachment menu...`);
-  await humanGlide(page, addBox.x + addBox.width / 2, addBox.y + addBox.height / 2, 22);
-  await sleep(350);
-  await humanClick(page);
-  await sleep(700);
-
-  // The menu item carries a tooltip that sits on top of it and swallows real
-  // clicks, so this one is dispatched rather than aimed.
-  const menuItem = page.locator('[role="menuitem"], .cdk-menu-item').first();
-  const itemBox = await menuItem.boundingBox().catch(() => null);
-  if (itemBox) {
-    await humanGlide(page, itemBox.x + itemBox.width / 2, itemBox.y + itemBox.height / 2, 20);
-    await sleep(400);
-  }
-  await menuItem.click({ force: true }).catch(() => undefined);
-
-  await openFileDialog(page, [
-    { name: FIXTURE_NAME, kind: 'PNG image', size: `${Math.round(buffer.length / 1024)} KB` },
-    { name: 'team_offsite.jpg', kind: 'JPG image', size: '184 KB' },
-    { name: 'invoice_2026_08.pdf', kind: 'PDF document', size: '96 KB' },
-  ]);
-  await pickFileInDialog(page);
-  await closeFileDialog(page);
-
-  const chooser = await Promise.race([
-    chooserReady,
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000)),
-  ]);
-
-  if (!chooser) {
-    console.warn(`   ⚠️ No file chooser was raised — skipping the image half.`);
-    return false;
-  }
-
-  await chooser.setFiles({ name: FIXTURE_NAME, mimeType: 'image/png', buffer });
-  console.log(`   📁 ${FIXTURE_NAME} attached (${buffer.length} bytes).`);
-  await sleep(1600);
-  return true;
-}
+import { writeScratchNote } from './scratch-note';
 
 /**
  * Holds `getUserMedia` until the Allow click, then satisfies it — from the real
@@ -235,29 +130,6 @@ export const runVoiceAction: PageActionHandler = async (
   config: PageRecordConfig,
 ) => {
   const origin = new URL(page.url()).host;
-  const wait = config.waitAfterPromptMs ?? 4000;
-
-  // ── 1. The half that works ───────────────────────────────────────────────
-  await showCaption(page, 'Multimodal input — attaching an image to the composer', 'good');
-
-  const attached = await attachImage(page);
-  if (attached) {
-    const imgCount = await sendPrompt(
-      page,
-      'Read the attached chart. What is its title, and what is the Q4 value?',
-    );
-    try {
-      await waitForAgentResponseCompletion(page, wait, imgCount);
-      await showCaption(page, 'The image was read correctly — multimodal input works', 'good');
-      await sleep(2500);
-    } catch (e) {
-      if (!(e instanceof AgentSilentError)) throw e;
-      console.warn(`   ⚠️ No reply to the image prompt.`);
-    }
-  }
-
-  // ── 2. The half that does not ────────────────────────────────────────────
-  await showCaption(page, 'Voice input — the same composer, the microphone control', 'bad');
 
   await armMicrophone(page);
   // Playwright contexts deny by default, which would reject the call before the
@@ -268,16 +140,20 @@ export const runVoiceAction: PageActionHandler = async (
     .catch(() => console.warn(`   ⚠️ could not grant microphone permission.`));
 
   const micBtn = page
-    .locator('copilot-chat-start-transcribe-button button, button[aria-label*="Transcribe" i]')
+    .locator(
+      'copilot-chat-start-transcribe-button button, button[aria-label*="Transcribe" i]',
+    )
     .first();
 
   const micBox = await micBtn
-    .waitFor({ state: 'visible', timeout: 8000 })
+    .waitFor({ state: 'visible', timeout: 15000 })
     .then(() => micBtn.boundingBox())
     .catch(() => null);
 
   if (!micBox) {
-    console.warn(`   ⚠️ transcribe control not found — skipping the voice path.`);
+    console.warn(
+      `   ⚠️ transcribe control not found — the voice path could not be driven.`,
+    );
   } else {
     console.log(`   🎙️ Clicking the microphone control...`);
     await humanGlide(page, micBox.x + micBox.width / 2, micBox.y + micBox.height / 2, 22);
@@ -289,7 +165,12 @@ export const runVoiceAction: PageActionHandler = async (
     const allowBtn = page.locator('#sim-permission-allow');
     const allowBox = await allowBtn.boundingBox().catch(() => null);
     if (allowBox) {
-      await humanGlide(page, allowBox.x + allowBox.width / 2, allowBox.y + allowBox.height / 2, 22);
+      await humanGlide(
+        page,
+        allowBox.x + allowBox.width / 2,
+        allowBox.y + allowBox.height / 2,
+        22,
+      );
       await sleep(500);
       await humanClick(page);
     }
@@ -298,8 +179,8 @@ export const runVoiceAction: PageActionHandler = async (
     });
     await dismissPermissionBubble(page);
 
-    // Recording is now live: rest on the composer so the recording state, the
-    // elapsed timer and the stop control are all on screen long enough to read.
+    // Recording is live: rest on the composer so the recording state, the
+    // elapsed timer and the stop control are all readable.
     const stopBtn = page
       .locator(
         'copilot-chat-finish-transcribe-button button, copilot-chat-cancel-transcribe-button button, ' +
@@ -313,7 +194,9 @@ export const runVoiceAction: PageActionHandler = async (
       .catch(() => false);
 
     const synthetic = await page
-      .evaluate(() => (window as unknown as { __micSynthetic?: boolean }).__micSynthetic === true)
+      .evaluate(
+        () => (window as unknown as { __micSynthetic?: boolean }).__micSynthetic === true,
+      )
       .catch(() => false);
 
     console.log(
@@ -329,29 +212,38 @@ export const runVoiceAction: PageActionHandler = async (
     if (recording) {
       const stopBox = await stopBtn.boundingBox().catch(() => null);
       if (stopBox) {
-        console.log(`   ⏹️ Stopping — this is the request that has no service behind it.`);
-        await showCaption(page, 'Stopping posts the audio for transcription…', 'bad');
-        await humanGlide(page, stopBox.x + stopBox.width / 2, stopBox.y + stopBox.height / 2, 20);
+        console.log(`   ⏹️ Stopping — this is the request with no service behind it.`);
+        await humanGlide(
+          page,
+          stopBox.x + stopBox.width / 2,
+          stopBox.y + stopBox.height / 2,
+          20,
+        );
         await sleep(400);
         await humanClick(page);
         await sleep(3500);
       }
     }
-
-    await showCaption(page, 'Nothing was transcribed. The composer is still empty', 'bad');
-    await sleep(2500);
   }
 
-  // ── 3. The finding, while the empty composer is still on screen ──────────
+  // The finding, while the still-empty composer is on screen.
   if (config.knownIssue) {
-    await writeIssueNote(page, config.id, config.knownIssue);
+    await writeScratchNote(page, 'voice.txt', [
+      'voice',
+      '',
+      'mic renders asks permission and records fine',
+      'stop posts the audio and nothing comes back',
+      'composer stays empty',
+      '',
+      'runtime has no transcription service configured',
+      '',
+      'images on the same composer read fine',
+      'so only the voice half is broken',
+    ]);
   }
 
-  // Typed, not spoken — so the page still ends on a real agent reply and the
-  // clip cannot be mistaken for a dead stack.
+  // Typed, not spoken -- so the page still ends on a real agent reply.
   console.log(`   ⌨️ Falling back to the keyboard for the actual turn...`);
   const msgCount = await sendPrompt(page, config.prompt);
-  await waitForAgentResponseCompletion(page, wait, msgCount).catch((e) => {
-    if (!(e instanceof AgentSilentError)) throw e;
-  });
+  await waitForAgentResponseCompletion(page, config.waitAfterPromptMs ?? 4000, msgCount);
 };

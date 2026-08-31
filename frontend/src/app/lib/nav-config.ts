@@ -152,19 +152,10 @@ export const NAV: NavGroup[] = [
         title: 'Human-in-the-loop and interrupts',
         docPath: '/angular/deepagents/guides/human-in-the-loop',
         summary:
-          'A decision tool that pauses the run until the user answers.',
+          'A decision tool that pauses the run until the user answers, plus the interrupt controller beside it.',
         status: 'working',
-      },
-      {
-        path: '/interrupts',
-        hasDemo: true,
-        title: 'Interrupts',
-        docPath: '/angular/deepagents/guides/human-in-the-loop',
-        summary:
-          'The two interrupt controllers 0.4.0 documents, and the published snippet that cannot run.',
-        status: 'partial',
         statusNote:
-          'Split from /human-in-the-loop on 31 Aug 2026: only the tool half runs here, so the two shared a frame in which one surface was always blank. Both controllers are mounted and listening, but this backend emits no AG-UI interrupt, so neither ever renders — the half cannot be exercised here. The guide writes injectAgentStore("ticketing"), an agent these docs never define, so the route passes "default" and notes the swap on the page.',
+          'The tool path is live. The store interrupt controller is mounted and listening, but this backend emits no AG-UI interrupt, so that half stays blank by design and the route says so on screen.',
       },
       {
         path: '/shared-state',

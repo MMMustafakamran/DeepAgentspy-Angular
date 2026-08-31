@@ -33,7 +33,7 @@ export const PAGE_GROUPS = {
   // documents is reached from the quickstart's own closing step.
   getting_started: ['quickstart', 'inspector', 'chat-ui'],
   generative_ui: ['frontend-tools-generative-ui', 'a2ui'],
-  interaction: ['voice-multimodal', 'human-in-the-loop', 'interrupts'],
+  interaction: ['voice-multimodal', 'human-in-the-loop'],
   shared_state: ['shared-state'],
   // Four demos sharing one doc page
   // (`guides/threads-memory-attachments-headless`), so they are one checkbox:
