@@ -246,6 +246,14 @@ export const PAGES = definePages([
     endLine: 26,
     extraTabs: [
       { filePath: 'frontend/src/app/features/hitl/approval-card.component.ts', startLine: 16, endLine: 39 },
+      // The half 0.4.0 added, and the page's defect. The range ends on
+      // `injectAgentStore('default')` -- the one line that departs from the
+      // published snippet, because the published `"ticketing"` throws.
+      {
+        filePath: 'frontend/src/app/features/hitl/store-interrupt-panel.component.ts',
+        startLine: 30,
+        endLine: 48,
+      },
     ],
     prompt: 'Delete my account, but ask me to approve it first.',
     waitAfterPromptMs: 4000,
