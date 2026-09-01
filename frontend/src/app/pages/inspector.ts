@@ -13,15 +13,28 @@ import { InspectorProbeComponent } from '../features/inspector/inspector-probe.c
     <div class="space-y-6">
       <ui-try-it>
         <p class="mt-1 text-slate-700">
-          Nothing to send. Look at the corner of this page for the Inspector
-          button, then read the mount check below.
+          Read the mount check below, then open the demo and walk the
+          quickstart's confirm-setup step: send a message, click the Inspector
+          launcher in the corner, open <strong>Agents</strong> and pick
+          <code>default</code> in the sidebar agent selector, then open
+          <strong>AG-UI Events</strong>.
         </p>
         <p class="mt-2 text-slate-700">
           <strong>Pass:</strong> the check reports exactly one
           <code>cpk-web-inspector</code> element, appended to
-          <code>document.body</code>, and this app contains no code that put it
-          there. <strong>Fail:</strong> zero elements (the framework did not
-          mount it), or more than one (something is mounting it by hand).
+          <code>document.body</code>, this app contains no code that put it
+          there, the Agent panel shows <code>default</code> once selected, and
+          AG-UI Events has the run's events in it. <strong>Fail:</strong> zero
+          elements (the framework did not mount it), more than one (something is
+          mounting it by hand), or a launcher that opens onto panels with
+          nothing in them.
+        </p>
+        <p class="mt-2 text-slate-700">
+          Note the extra step. The quickstart says
+          <em>"Open Agents, then Agent. Your agent is listed"</em>, but the
+          panel opens on <code>No agent selected</code> — the agent appears only
+          after picking it from the sidebar selector, which the step does not
+          mention. The recorder performs both halves and logs each state.
         </p>
       </ui-try-it>
 
