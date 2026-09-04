@@ -244,6 +244,44 @@ the same `knownIssue` objects the clips put on screen — see *Recording and CI*
   available for this runtime." fallback. Since that fallback is the
   `@if (!isAvailable())` branch, the gate is returning **true**, yet no request
   to any memory endpoint is ever issued. Tracked on `/memory`.
+- **The guide's new `registerComponent` section runs, and its snippet is wrong
+  four ways.** The guide's new first section, “Let the agent display one of your
+  components”, teaches display-only generative UI through `registerComponent` —
+  no `handler`, nothing on the agent side. The premise holds: `show_incident` is
+  declared by the browser, forwarded over AG-UI, and called by the model with
+  the deepagents graph untouched. Implemented verbatim at `@copilotkit/angular`
+  0.5.1, the published snippet then fails four ways, all reproduced against a
+  live agent:
+  (1) **Every call produces a second turn nobody asked for.** With no `handler`,
+  core writes an empty tool result and the model is always handed another turn.
+  What lands there is model-dependent — a false apology contradicting the card
+  on `gpt-4o-mini`, filler on stronger models. `followUp: false` removes it, and
+  the guide never mentions `followUp`.
+  (2) **The loading guard never fires.** It gates on `status === "in-progress"`;
+  the observed status while arguments stream is `"executing"`, so the `@else`
+  branch runs with empty args and paints a blank card first.
+  (3) **The status never reaches `"complete"`.** Sampled once a second for 25
+  seconds: `"executing"` throughout. The `registerRenderToolCall` snippet higher
+  up the same page gates on `"complete"`, so that documented pattern applied to
+  a display-only tool loads forever.
+  (4) **The card is not a card.** No CSS, and an inline `<strong>` beside an
+  inline `<span>`, so Angular's default `preserveWhitespaces` strips the gap and
+  it renders as `INC-4711sev1`.
+  Smaller gaps: the registration fence shows no imports, so `registerComponent`
+  and `z` are undefined identifiers as published; the section never says it must
+  run in an Angular injection context though the API reference requires one; and
+  the `description` you pass reaches the model behind a prepended preamble. The
+  same page also contradicts itself: the older “Render a tool result” snippet
+  imports `{ type AngularToolCall, type ToolRenderer }` and sets no
+  `standalone`, the new one imports both as values and sets `standalone: true` —
+  which `frontend/AGENTS.md` forbids. Both are kept as published, at
+  `frontend/src/app/features/tools/incident-card.component.ts`.
+  *Note, not a finding:* `registerComponent` does not exist in 0.4.0, which this
+  repo declared until now, and `^0.4.0` can never reach 0.5.x; the quickstart's
+  unpinned install gives a new reader 0.5.1, so the frontend moved to `^0.5.1`
+  (and `@copilotkit/runtime` to `^1.70.1`) to QA the section at all.
+  Confirmed against the installed package on **4 Sep 2026**. Tracked on
+  `/frontend-tools-generative-ui`.
 - **`getWeather` argument mismatch.** The agent declares
   `getWeather(location: str)`, but the frontend renderer in
   `src/app/features/tools/` is written against `{ city }`. The tool call still

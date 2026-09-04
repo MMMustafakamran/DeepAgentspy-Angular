@@ -130,12 +130,20 @@ export const PAGES = definePages([
     videoName: 'FrontendToolsGenerativeUi',
     docPath: 'guides/frontend-tools-generative-ui',
     route: 'frontend-tools-generative-ui',
-    // The constructor is the lesson: `registerRenderToolCall` for the
-    // server-side tool, `registerFrontendTool` for the browser-side one.
+    // The class is the lesson, and it now holds all three of the guide's
+    // generative-UI paths, all three live: `registerRenderToolCall` for the
+    // server-side tool, `registerFrontendTool` for the browser-side one, and
+    // `registerComponent` for the display-only path. Re-counted after that
+    // third call replaced its commented-out stand-in; lines 55-77 of 78.
     ideFile: 'frontend/src/app/features/tools/tools-chat.component.ts',
-    startLine: 47,
-    endLine: 60,
+    startLine: 55,
+    endLine: 77,
     extraTabs: [
+      // The new first section's renderer, verbatim. Its
+      // `@if (call.status === "in-progress")` guard is the second finding on
+      // camera: the real status is "executing", so the guard never fires and
+      // the @else branch paints an empty card until the args land.
+      { filePath: 'frontend/src/app/features/tools/incident-card.component.ts', startLine: 10, endLine: 27 },
       { filePath: 'frontend/src/app/features/tools/weather-card.component.ts', startLine: 10, endLine: 27 },
       // The other half of the pair: getWeather runs in the DeepAgents graph and
       // the browser only renders the call.
@@ -143,16 +151,55 @@ export const PAGES = definePages([
       // Worth watching on the clip: the graph declares `getWeather(location)`
       // while the renderer above binds `call.args.city`, so the card can render
       // with an empty heading even though the agent answers correctly. The QA
-      // report scores this page as passing and records no symptom for it, so it
-      // carries no `knownIssue` — but if the card looks wrong on the video,
-      // this is why, and it is worth re-testing deliberately.
+      // report scores that behaviour as passing and records no symptom for it,
+      // so the `knownIssue` below is not about it — but if the card looks wrong
+      // on the video, this is why, and it is worth re-testing deliberately.
       { filePath: 'backend/main.py', startLine: 4, endLine: 12 },
     ],
-    // Two turns: a server-side tool the browser only renders, then a frontend
-    // tool whose result is the page itself repainting.
+    // Three turns: a server-side tool the browser only renders, a frontend tool
+    // whose result is the page itself repainting, and the new display-only
+    // registration — which draws the right card and then earns a second turn
+    // nobody asked for.
     prompt: "What's the weather in Tokyo?",
-    prompts: ["What's the weather in Tokyo?", 'Change the background to violet'],
+    prompts: [
+      "What's the weather in Tokyo?",
+      'Change the background to violet',
+      'Show me incident INC-4711, severity sev1.',
+    ],
     waitAfterPromptMs: 4000,
+    // Confirmed 4 Sep 2026 against the installed package and on camera: the
+    // third turn draws the card and then the spurious follow-up beneath it.
+    knownIssue: {
+      area: 'Deep Agents (Angular) - Guides - Frontend tools and generative UI',
+      problem:
+        'The page’s new first section, “Let the agent display one of your components”, runs — and its ' +
+        'published snippet is wrong four ways. (1) It carries no `handler`, so core writes an empty tool ' +
+        'result and the model is always handed a second turn nobody asked for; what lands there is ' +
+        'model-dependent, a false apology contradicting the card on gpt-4o-mini and filler on stronger ' +
+        'models. (2) It guards on `status === "in-progress"`, but the status observed while arguments ' +
+        'stream is `"executing"`, so the guard never fires and the `@else` branch paints an empty card ' +
+        'first. (3) The status never reaches `"complete"` at all — sampled once a second for 25 seconds. ' +
+        '(4) It ships no CSS and pairs an inline `<strong>` with an inline `<span>`, so Angular’s default ' +
+        '`preserveWhitespaces` strips the gap and the “card” renders as `INC-4711sev1`.',
+      impact:
+        'Following the section exactly gives you a card that flashes blank, never completes, is not styled ' +
+        'as a card, and is followed by a message the author never asked for. Finding 3 is the sharpest: the ' +
+        '`registerRenderToolCall` snippet higher up this same page gates its content on `"complete"`, and ' +
+        'the prose above it states the status “moves through in-progress, executing, and complete” — so ' +
+        'applying the page’s own documented pattern to a display-only tool renders the loading branch ' +
+        'forever. Smaller gaps compound it: the registration fence shows no imports, the section never ' +
+        'states the injection-context requirement its API reference imposes, and the `description` written ' +
+        'by the caller reaches the model behind a preamble core prepends.',
+      likelyCause:
+        'The section was written against the API and never run end to end against a model. `followUp: false` ' +
+        'exists on `RegisterComponentConfig` and removes the spurious turn, but the guide never mentions it. ' +
+        'The status-lifecycle prose was carried over from the handler-bearing paths, where in-progress and ' +
+        'complete do occur, without rechecking it against a display-only registration that has no execution ' +
+        'phase to complete. The page also contradicts itself on the same subject: the older “Render a tool ' +
+        'result” snippet imports `{ type AngularToolCall, type ToolRenderer }` and sets no `standalone`, ' +
+        'while the new snippet imports both as values and sets `standalone: true` — two renderers, one ' +
+        'page, two conventions.',
+    },
   },
   {
     id: 'a2ui',

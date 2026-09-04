@@ -1,5 +1,5 @@
 /**
- * Frontend tools and generative UI — the two halves of the guide, one turn each.
+ * Frontend tools and generative UI — three paths, one turn each.
  *
  * https://docs.copilotkit.ai/angular/deepagents/guides/frontend-tools-generative-ui
  *
@@ -8,6 +8,15 @@
  * Turn 2 calls `change_background`, which runs in the browser and renders
  * nothing in chat — its result is the page itself repainting, so the cursor
  * has to go and look at the page.
+ *
+ * Turn 3 is the guide's new first section, `registerComponent`, and it is why
+ * this page now carries a `knownIssue`. The card renders correctly and the
+ * model is then handed a second turn nobody asked for. Four defects sit in
+ * that one turn, all in the snippet as published against 0.5.1: the spurious
+ * follow-up (no `handler` means core writes an empty tool result), a loading
+ * guard that never fires (it gates on "in-progress"; the real status is
+ * "executing"), a status that never reaches "complete" at all, and a "card"
+ * that ships no CSS and renders as the run-together string INC-4711sev1.
  *
  * ── One difference from the sibling repos ──────────────────────────────────
  * This demo mounts `<copilot-sidebar />`, not an inline `<copilot-chat />`
@@ -30,6 +39,7 @@ import { humanClick, humanGlide, sleep } from '../core/overlays/cursor';
 import { type PageActionHandler, type PageRecordConfig } from '../core/types';
 
 import { waitForDomSettled } from './page-ready';
+import { writeScratchNote } from './scratch-note';
 
 /**
  * Opens the sidebar if it is closed.
@@ -72,11 +82,30 @@ async function ensureSidebarOpen(page: Page): Promise<void> {
   await sleep(600);
 }
 
+/**
+ * The incident card's two fields. Read separately from "is it in the DOM",
+ * because the finding is a card that mounts with both of them empty.
+ */
+async function readIncidentCard(
+  page: Page,
+): Promise<{ id: string; severity: string } | null> {
+  return page
+    .evaluate(() => {
+      const card = document.querySelector('app-incident-card');
+      if (!card) return null;
+      return {
+        id: (card.querySelector('strong')?.textContent ?? '').trim(),
+        severity: (card.querySelector('span')?.textContent ?? '').trim(),
+      };
+    })
+    .catch(() => null);
+}
+
 export const runToolsAction: PageActionHandler = async (
   page: Page,
   config: PageRecordConfig,
 ) => {
-  const [weatherPrompt, backgroundPrompt] = promptsFor(config);
+  const [weatherPrompt, backgroundPrompt, incidentPrompt] = promptsFor(config);
   const wait = config.waitAfterPromptMs ?? 4000;
 
   await ensureSidebarOpen(page);
@@ -112,4 +141,60 @@ export const runToolsAction: PageActionHandler = async (
   await sleep(1000);
   await humanGlide(page, 700, 520, 25);
   await sleep(2000);
+
+  // ── Display-only registration: the guide's new section, and the finding ───
+  if (!incidentPrompt) return;
+  console.log(`   🪪 Display-only tool: ${incidentPrompt}`);
+  const thirdCount = await sendPrompt(page, incidentPrompt);
+
+  const incidentCard = page.locator('app-incident-card').first();
+  await incidentCard.waitFor({ state: 'visible', timeout: 25000 }).catch(() => {
+    console.warn(`   ⚠️ app-incident-card never rendered — registerComponent did not fire.`);
+  });
+
+  // Sampled the instant it mounts. The guide's in-progress guard does not fire,
+  // so this is where the empty-card frame is caught if it is catchable.
+  const atMount = await readIncidentCard(page);
+  console.log(
+    `   🔎 At mount: id="${atMount?.id ?? '(no card)'}" severity="${atMount?.severity ?? ''}"`,
+  );
+
+  await waitForAgentResponseCompletion(page, wait, thirdCount);
+
+  const settled = await readIncidentCard(page);
+  if (settled && settled.id) {
+    console.log(`   ✅ Card settled correct: ${settled.id} / ${settled.severity}.`);
+  } else {
+    console.warn(`   ⚠️ Card never filled in.`);
+  }
+
+  // Rest on the card, then travel down to the turn underneath it. The two being
+  // on screen together is the whole point of the shot.
+  const incidentBox = await incidentCard.boundingBox().catch(() => null);
+  if (incidentBox) {
+    await humanGlide(page, incidentBox.x + 60, incidentBox.y + 18, 22);
+    await sleep(2400);
+    console.log(`   👇 Travelling to the follow-up turn beneath it.`);
+    await humanGlide(page, incidentBox.x + 80, incidentBox.y + incidentBox.height + 70, 20);
+    await sleep(2600);
+  }
+
+  await writeScratchNote(page, 'registercomponent.txt', [
+    'card is right',
+    'the message under it is a turn nobody asked for',
+    'no handler means core writes an empty tool result',
+    'so the model always gets another turn',
+    'followUp: false removes it - guide never says so',
+    '',
+    'it guards on status in-progress',
+    'real status is executing so the guard never fires',
+    'card paints empty first',
+    '',
+    'and it never reaches complete at all',
+    'the other renderer on this page says gate on complete',
+    'do that here and it loads forever',
+    '',
+    'no css either and angular strips the gap',
+    'renders INC-4711sev1 - not a card',
+  ]);
 };
