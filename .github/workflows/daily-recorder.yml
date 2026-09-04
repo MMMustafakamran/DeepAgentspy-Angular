@@ -301,6 +301,21 @@ jobs:
         with:
           node-version: 22
 
+      # The runner's Node 22 ships npm 10, but this frontend pins npm 12 in
+      # `packageManager`. That gap is not cosmetic: npm 10 cannot resolve the
+      # `"rxjs": "$rxjs"` reference in the frontend's `overrides`, and a
+      # lockfile-free install -- which is what every run here performs -- dies
+      # inside arborist with "Cannot read properties of null (reading
+      # 'edgesOut')". Read the pin rather than restating it, so bumping
+      # package.json cannot leave CI behind again.
+      - name: Use the npm version the frontend pins
+        run: |
+          set -euo pipefail
+          PINNED="$(node -p "require('./frontend/package.json').packageManager")"
+          echo "Runner has npm $(npm --version); frontend pins $PINNED"
+          npm install -g "$PINNED"
+          npm --version
+
       # Resolve the way a recording run does -- ci/automate.mjs drops the
       # lockfiles by default -- so this describes the range boundaries as they
       # stand this morning, not versions committed months ago.
@@ -386,6 +401,21 @@ jobs:
           cache-dependency-path: |
             frontend/package-lock.json
             autorecorder/package-lock.json
+
+      # The runner's Node 22 ships npm 10, but this frontend pins npm 12 in
+      # `packageManager`. That gap is not cosmetic: npm 10 cannot resolve the
+      # `"rxjs": "$rxjs"` reference in the frontend's `overrides`, and a
+      # lockfile-free install -- which is what every run here performs -- dies
+      # inside arborist with "Cannot read properties of null (reading
+      # 'edgesOut')". Read the pin rather than restating it, so bumping
+      # package.json cannot leave CI behind again.
+      - name: Use the npm version the frontend pins
+        run: |
+          set -euo pipefail
+          PINNED="$(node -p "require('./frontend/package.json').packageManager")"
+          echo "Runner has npm $(npm --version); frontend pins $PINNED"
+          npm install -g "$PINNED"
+          npm --version
 
       - name: Install Playwright & System Chromium Dependencies
         run: |
