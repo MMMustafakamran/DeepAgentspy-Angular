@@ -7,7 +7,11 @@
  * onto the already-muxed file. Muxing now happens once, where the video is
  * produced; the workflow just installs ffmpeg and lets this run.
  *
- * WebM cannot carry AAC — the audio is re-encoded to libopus. Missing ffmpeg
+ * WebM carries only Vorbis or Opus, and the choice is not free: Windows Media
+ * Player renders VP8 fine and has no Opus decoder, so an Opus track plays as
+ * silence there with no error and no warning — which is how a correctly muxed
+ * clip gets reported as "the video has no audio". Vorbis is decoded by WMP and
+ * by every browser, so it is what these are encoded with. Missing ffmpeg
  * is a skip, not a failure: a silent demo still beats no demo.
  */
 import { execSync } from 'node:child_process';
@@ -91,7 +95,7 @@ export function muxAudioFiles() {
       // with silence and -shortest then stops at the video, which also keeps a
       // track that overruns from extending the clip past its last frame.
       execSync(
-        `ffmpeg -y -i "${inputPath}" -i "${audioPath}" -c:v copy -c:a libopus -af apad -map 0:v:0 -map 1:a:0 -shortest "${tempPath}"`,
+        `ffmpeg -y -i "${inputPath}" -i "${audioPath}" -c:v copy -c:a libvorbis -q:a 5 -af apad -map 0:v:0 -map 1:a:0 -shortest "${tempPath}"`,
         { stdio: 'ignore' },
       );
       fs.copyFileSync(tempPath, inputPath);
