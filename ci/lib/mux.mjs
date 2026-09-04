@@ -22,12 +22,13 @@ import { AUDIO_DIR, VIDEOS_DIR } from './config.mjs';
  *
  * The mapping is explicit rather than inferred from filenames, so a renamed demo
  * drops its voiceover visibly instead of quietly muxing it onto the wrong clip.
- * Both matches are unique across this repo's `videoName`s.
+ * All four matches are unique across this repo's `videoName`s.
  *
- * The two tracks live in `autorecorder/audio/` and are shared verbatim with the
+ * The four tracks live in `autorecorder/audio/` and are shared verbatim with the
  * other Angular repos: the narration is about the CopilotKit concept, not the
- * agent framework behind it, so the same recording fits AGNO-, MASTRA-, MSPY-
- * and DAPY-angular. Every other clip stays silent and is skipped by this table.
+ * agent framework behind it, and all of them now run the same handler for these
+ * pages, so one recording fits AG2-, AGNO-, MASTRA-, MSPY- and DAPY-angular.
+ * Every other clip stays silent and is skipped by this table.
  *
  * Silence is the right default for the four issue clips in particular — they
  * carry their report as on-screen text in a Notepad window, which survives being
@@ -36,6 +37,11 @@ import { AUDIO_DIR, VIDEOS_DIR } from './config.mjs';
  * @type {{ audioFile: string, videoMatch: string }[]}
  */
 const AUDIO_TRACKS = [
+  { audioFile: 'angular-frontendtoolsv1.71.m4a', videoMatch: 'FrontendToolsGenerativeUi' },
+  // Both halves of the voice/multimodal clip are narrated: the attachment that
+  // works, then the transcription that has no service behind it. The track only
+  // lines up with a clip recorded by the current actions/voice.action.ts.
+  { audioFile: 'angular- voice and attachments.m4a', videoMatch: 'VoiceMultimodal' },
   { audioFile: 'sharedstate-angular.m4a', videoMatch: 'SharedState' },
   { audioFile: 'thread-angular.m4a', videoMatch: 'Threads' },
 ];
@@ -77,8 +83,15 @@ export function muxAudioFiles() {
     console.log(`\n🎵 [Audio Mux] Adding ${track.audioFile} to ${video}...`);
 
     try {
+      // `-af apad` + `-shortest` together pin the output to the VIDEO's length.
+      // `-shortest` alone stops at whichever stream ends first, and these
+      // narrations are shorter than the clips they describe (45s of audio over
+      // a 72s Shared State demo), so the bare flag cut the demo off mid-scene —
+      // the same bug the other Angular repos fixed here. apad pads the track
+      // with silence and -shortest then stops at the video, which also keeps a
+      // track that overruns from extending the clip past its last frame.
       execSync(
-        `ffmpeg -y -i "${inputPath}" -i "${audioPath}" -c:v copy -c:a libopus -map 0:v:0 -map 1:a:0 -shortest "${tempPath}"`,
+        `ffmpeg -y -i "${inputPath}" -i "${audioPath}" -c:v copy -c:a libopus -af apad -map 0:v:0 -map 1:a:0 -shortest "${tempPath}"`,
         { stdio: 'ignore' },
       );
       fs.copyFileSync(tempPath, inputPath);
