@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "docsRoot": "https://docs.copilotkit.ai/angular/deepagents",
-  "syncedAt": "2026-08-30T11:24:20.095Z",
+  "syncedAt": "2026-09-04T07:57:58.605Z",
   "pages": {
     "/angular/deepagents": {
       "file": "angular__deepagents.md",
-      "sha256": "0a01507e2b7004bb84d41ea3e1322debc76467780d7061ae50baca1a2f871ea2",
-      "bytes": 7144,
+      "sha256": "7df8359d81143de10e7de7ef5a036d7034c89b9f19015710433d02bb83b2123d",
+      "bytes": 7149,
       "lines": 185,
       "routes": [
         "/",
@@ -14,7 +14,7 @@
       ],
       "status": "ok",
       "age": 0,
-      "date": "Sun, 30 Aug 2026 11:06:19 GMT"
+      "date": "Fri, 04 Sep 2026 07:57:58 GMT"
     },
     "/angular/deepagents/guides/a2ui": {
       "file": "angular__deepagents__guides__a2ui.md",
@@ -42,15 +42,15 @@
     },
     "/angular/deepagents/guides/frontend-tools-generative-ui": {
       "file": "angular__deepagents__guides__frontend-tools-generative-ui.md",
-      "sha256": "90c41e8bdc69315b97b023f8938f90c3d2e414c6c9602fa91968c22346974cfe",
-      "bytes": 5732,
-      "lines": 178,
+      "sha256": "c14d6d00b44f495def7cc34c9e500915a8e134fd5752860a0aaefb3e66b8882f",
+      "bytes": 7888,
+      "lines": 236,
       "routes": [
         "/frontend-tools-generative-ui"
       ],
       "status": "ok",
       "age": 0,
-      "date": "Tue, 18 Aug 2026 06:47:16 GMT"
+      "date": "Fri, 04 Sep 2026 07:57:58 GMT"
     },
     "/angular/deepagents/guides/human-in-the-loop": {
       "file": "angular__deepagents__guides__human-in-the-loop.md",
@@ -117,15 +117,15 @@
     },
     "/angular/deepagents/quickstart": {
       "file": "angular__deepagents__quickstart.md",
-      "sha256": "0a01507e2b7004bb84d41ea3e1322debc76467780d7061ae50baca1a2f871ea2",
-      "bytes": 7144,
+      "sha256": "7df8359d81143de10e7de7ef5a036d7034c89b9f19015710433d02bb83b2123d",
+      "bytes": 7149,
       "lines": 185,
       "routes": [
         "/quickstart"
       ],
       "status": "ok",
       "age": 0,
-      "date": "Sun, 30 Aug 2026 11:06:19 GMT"
+      "date": "Fri, 04 Sep 2026 07:57:58 GMT"
     }
   },
   "sitemap": {
