@@ -123,6 +123,20 @@ await waitForAgentResponseCompletion(page, config.waitAfterPromptMs ?? 4000, msg
 Pass that count through on multi-turn pages, or the previous turn's reply is
 mistaken for this one's.
 
+A handler's fourth argument, `ctx`, is how it reports what it saw. Use it
+instead of `console.warn`, which reaches nobody:
+
+```ts
+export const runSharedStateReadAction: PageActionHandler = async (page, config, _rootPath, ctx) => {
+  ...
+  if (!toggleVisible) ctx.fail('"Toggle Language" button never rendered'); // [FAIL], clip still saved
+  if (followed) ctx.warn('the panel followed the agent -- the documented defect did not reproduce'); // note on the result
+};
+```
+
+`ctx.timeouts` carries the resolved waits for the page (see `core/timeouts.ts`;
+override per project in `project.config.ts` or per page with `timeouts`).
+
 Delete handlers for pages that no longer exist. The doctor warns about orphans.
 
 

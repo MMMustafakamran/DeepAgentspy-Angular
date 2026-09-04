@@ -91,7 +91,7 @@ export const PAGES = definePages([
       // The graph itself — 12 lines, so the whole file.
       { filePath: 'backend/main.py', startLine: 1, endLine: 12 },
     ],
-    prompt: 'Can you tell me a joke?',
+    prompt: 'Hey, are you connected? Tell me a quick fun fact about kites.',
     waitAfterPromptMs: 4000,
   },
 
@@ -117,10 +117,10 @@ export const PAGES = definePages([
     ],
     // Four surfaces, driven in order by the handler: inline, custom assistant
     // message, popup, sidebar. Only the first two take a prompt.
-    prompt: 'What is CopilotKit?',
+    prompt: 'In two sentences, what does CopilotKit do?',
     prompts: [
-      'What is CopilotKit?',
-      'Tell me what makes your custom assistant layout unique.',
+      'In two sentences, what does CopilotKit do?',
+      'Nice layout. What is different about how you are rendered here?',
     ],
     waitAfterPromptMs: 4000,
   },
@@ -160,11 +160,11 @@ export const PAGES = definePages([
     // whose result is the page itself repainting, and the new display-only
     // registration — which draws the right card and then earns a second turn
     // nobody asked for.
-    prompt: "What's the weather in Tokyo?",
+    prompt: 'Check the weather in Tokyo for me.',
     prompts: [
-      "What's the weather in Tokyo?",
-      'Change the background to violet',
-      'Show me incident INC-4711, severity sev1.',
+      'Check the weather in Tokyo for me.',
+      'Could you change the background to violet?',
+      'Pull up incident INC-4711 for me. It is a sev1.',
     ],
     waitAfterPromptMs: 4000,
     // Confirmed 4 Sep 2026 against the installed package and on camera: the
@@ -223,7 +223,7 @@ export const PAGES = definePages([
       { filePath: 'frontend/server.ts', startLine: 39, endLine: 45 },
     ],
     prompt:
-      'Show me a flight card for BA117 from London to New York, as a rendered UI component.',
+      'Can you show me a flight card for BA117, London to New York, as a rendered UI component?',
     waitAfterPromptMs: 5000,
     // Observed 28 Aug 2026 against @copilotkit/angular 0.3.1 / runtime 1.67.1.
     // NOTE the difference from the React/Python report, which describes this as
@@ -266,7 +266,7 @@ export const PAGES = definePages([
     // answerable from the system prompt. The microphone then records, and this
     // runtime configures no transcription service, so transcription fails by
     // design — the handler shows that and says so.
-    prompt: 'Read the attached chart. What is its title, and what is the Q4 value?',
+    prompt: 'Have a look at the chart I attached. What is it titled, and what does Q4 come to?',
     waitAfterPromptMs: 4000,
     knownIssue: {
       area: 'Deep Agents (Angular) - Guides - Voice and multimodal input',
@@ -307,7 +307,7 @@ export const PAGES = definePages([
         endLine: 48,
       },
     ],
-    prompt: 'Delete my account, but ask me to approve it first.',
+    prompt: 'Please delete my account. Check with me before you actually do it.',
     waitAfterPromptMs: 4000,
   },
   {
@@ -331,11 +331,11 @@ export const PAGES = definePages([
     ],
     // Read the state, change it from the UI, read it again, then prove the
     // read-only context channel independently.
-    prompt: 'what is priority set as?',
+    prompt: 'What is the priority set to right now?',
     prompts: [
-      'what is priority set as?',
-      'what is priority set as?',
-      'what is my timezone?',
+      'What is the priority set to right now?',
+      'What is the priority set to right now?',
+      'Which timezone am I on?',
     ],
     waitAfterPromptMs: 4000,
     // Observed 31 Aug 2026 against @copilotkit/angular 0.4.0 / runtime 1.67.1,
@@ -380,7 +380,7 @@ export const PAGES = definePages([
       { filePath: 'frontend/src/app/features/threads/conversations.component.ts', startLine: 7, endLine: 23 },
       { filePath: 'frontend/src/app/features/threads/threads-demo.component.ts', startLine: 10, endLine: 35 },
     ],
-    prompt: 'Give me a one-line summary of what threads are for.',
+    prompt: 'In one line, what are threads for?',
     waitAfterPromptMs: 4000,
     // Observed 28 Aug 2026. This finding was rewritten after watching the
     // network: the original assumption (borrowed from the sibling repos) was
@@ -421,7 +421,7 @@ export const PAGES = definePages([
     extraTabs: [
       { filePath: 'frontend/src/app/features/memory/memory-demo.component.ts', startLine: 10, endLine: 29 },
     ],
-    prompt: 'Remember that I prefer concise status updates.',
+    prompt: 'For future reference, I prefer concise status updates.',
     waitAfterPromptMs: 4000,
     // Observed 28 Aug 2026. Also rewritten after watching the network, and this
     // one inverts the expectation recorded in the repo's own nav-config, which
@@ -460,7 +460,7 @@ export const PAGES = definePages([
     // correct answer is proof the file reached the model. A generic "what types
     // of attachment are supported?" could be answered from the system prompt
     // alone, which is how a broken upload comes to look fine on video.
-    prompt: 'Read the attached chart. What is its title, and what is the Q4 value?',
+    prompt: 'I attached a chart. What is its title, and what is the Q4 number?',
     waitAfterPromptMs: 4000,
   },
   {
@@ -474,7 +474,7 @@ export const PAGES = definePages([
     ideFile: 'frontend/src/app/features/headless/headless-chat.component.ts',
     startLine: 10,
     endLine: 60,
-    prompt: 'Tell me a short joke about Angular.',
+    prompt: 'Tell me a short joke about Angular developers.',
     waitAfterPromptMs: 4000,
   },
   {
@@ -498,7 +498,7 @@ export const PAGES = definePages([
     ],
     // The quickstart's Inspector step is not satisfied by a static panel: it
     // asks the reader to send a message and watch AG-UI events move.
-    prompt: 'Say hello, so there is something for the Inspector to show.',
+    prompt: 'Say hi! I want to watch the events go by in the inspector.',
     waitAfterPromptMs: 4000,
     // Observed 30 Aug 2026 against @copilotkit/angular 0.4.0.
     // Not a defect in the Inspector itself -- it works, and the framework does

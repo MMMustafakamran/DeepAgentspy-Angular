@@ -113,13 +113,18 @@ history had to be rewritten. Publish them as release assets or to a bucket.
 ```
 
 - **PASS** — every step completed.
-- **PASS\*** — recorded, but the external doc page misbehaved. The intro footage
-  is degraded; the feature under test is not implicated.
+- **PASS\*** — recorded, with a note. Either the external doc page misbehaved
+  (intro footage degraded, feature not implicated), or the page's handler
+  reported something it did not see (`ctx.warn`), or the browser console
+  logged errors during the demo step. The notes are on the summary line and
+  in `RECORD_RESULTS.json`.
 - **ISSUE** — recorded a page that carries a `knownIssue`. Not a failure: the
   clip is doing its job. **It does not mean the defect was confirmed today** —
   the recorder cannot judge that. Watch the clip.
 - **FAIL** — the demo route 404'd, never rendered a chat surface, the agent never
-  answered where an answer was expected, or the IDE view could not be built.
+  answered where an answer was expected, the IDE view could not be built, or the
+  handler reported that the feature did not work (`ctx.fail`). The clip is still
+  saved as evidence.
 
 Only **FAIL** sets a non-zero exit code, so CI can be gated on it while five
 documented defects record every night without turning the pipeline red.
@@ -214,8 +219,11 @@ autorecorder/
 │   └── *.action.ts               per-page interaction scripts
 │
 ├── core/                       ← ✖ DO NOT EDIT — no framework knowledge here
+│   ├── CORE_MANIFEST.json        hash per core file; `npm run core:check` enforces it
 │   ├── engine.ts                 browser lifecycle, the 3-step sequence, outcomes
 │   ├── actions.ts                sendPrompt, response detection, standard action
+│   ├── select.ts                 which pages a `record` invocation means
+│   ├── timeouts.ts               every fixed wait, with project/page overrides
 │   ├── compare.ts                the same page on code that works
 │   ├── issue-note.ts             the defect report, typed on screen
 │   ├── doctor.ts                 the adaptation contract, as a command
@@ -224,7 +232,10 @@ autorecorder/
 │   ├── ide/generator.ts          VS Code simulator, Shiki-highlighted from disk
 │   └── overlays/                 taskbar, cursor, Notepad, alert, DevTools, caption
 │
-└── videos/                     ← output
+├── scripts/core-manifest.mjs   ← core/ drift check (--check / --write / --diff)
+├── test/                       ← unit tests for the pure modules (`npm test`)
+│
+└── videos/                     ← output, plus RECORD_RESULTS.json per run
 ```
 
 ---
@@ -241,6 +252,25 @@ autorecorder/
 3. **Demo** — opens the chrome-free demo route, drives the feature, and pauses
    for reading. On an issue page this is also where the defect is provoked,
    labelled, compared against working code, and written down.
+
+### What makes it read as a person
+
+Every pace in a take comes from `core/overlays/human.ts`, seeded from the
+page id. So two clips do not type, pause and scroll in the same rhythm — but
+tonight's take of a page is identical to last night's, which keeps two
+recordings of the same defect comparable.
+
+- **Typing** has a person's rhythm: jittered keystrokes, a beat after
+  punctuation, the odd mid-sentence pause — in the chat composer and in the
+  Notepad note alike. A retry after a swallowed submit is typed quickly
+  instead; that is the recorder recovering, not a performance.
+- **Scrolling** is in bursts: a few wheel notches, a reading pause, a few more,
+  sometimes a nudge back up.
+- **Pauses** vary by about a quarter around their nominal length.
+- **The cursor** overshoots slightly on long travel and settles, hovers a
+  variable moment before a click, drifts while a reply streams instead of
+  freezing, and starts each take somewhere plausible rather than dead centre.
+- **Windows** fade in over 180ms (IDE, Notepad) instead of cutting.
 
 Two details worth knowing, because both were bugs once:
 

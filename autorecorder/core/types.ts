@@ -5,13 +5,6 @@ import { type IdeTabConfig } from './ide/generator';
 export { type IdeTabConfig };
 
 /**
- * What an adaptation writes in `config/pages.config.ts`.
- *
- * Deliberately smaller than PageRecordConfig: URLs and filenames are derived
- * rather than repeated, so no entry can drift onto another framework's docs and
- * the video numbering always matches nav order.
- */
-/**
  * A defect this page is known to reproduce.
  *
  * Some repos exist to document a working integration; this one also exists to
@@ -47,6 +40,13 @@ export interface KnownIssue {
   expectsNoResponse?: boolean;
 }
 
+/**
+ * What an adaptation writes in `config/pages.config.ts`.
+ *
+ * Deliberately smaller than PageRecordConfig: URLs and filenames are derived
+ * rather than repeated, so no entry can drift onto another framework's docs and
+ * the video numbering always matches nav order.
+ */
 export interface PageDefinition {
   /** CLI id, also the `--<id>` flag. Must be unique. */
   id: string;
@@ -73,12 +73,6 @@ export interface PageDefinition {
   /** Extra IDE tabs to switch through, each with its own range. */
   extraTabs?: IdeTabConfig[];
 
-  /**
-   * The defect this page reproduces, when it reproduces one. Presence flips the
-   * take's outcome to `[ISSUE]` and is what the daily report generator reads.
-   */
-  knownIssue?: KnownIssue;
-
   /** Prompt to send. For multi-turn pages this is the first one. */
   prompt: string;
 
@@ -87,6 +81,15 @@ export interface PageDefinition {
 
   /** Reading pause after the reply finishes streaming. */
   waitAfterPromptMs?: number;
+
+  /**
+   * The defect this page reproduces, when it reproduces one. Presence flips the
+   * take's outcome to `[ISSUE]` and is what the daily report generator reads.
+   */
+  knownIssue?: KnownIssue;
+
+  /** Per-page overrides of the recorder's fixed waits. See `RecorderTimeouts`. */
+  timeouts?: Partial<RecorderTimeouts>;
 }
 
 /** A page definition with everything resolved. What the engine consumes. */
@@ -117,8 +120,47 @@ export function definePages(defs: PageDefinition[]): PageRecordConfig[] {
   });
 }
 
+/**
+ * How a page handler reports what it saw, so the summary and CI see it too.
+ *
+ * Before this, a handler that noticed "the weather card never rendered" could
+ * only `console.warn` it. The run still printed `[PASS]` with no asterisk, and
+ * the CI report carried nothing. `warn` puts the note on the result as `PASS*`;
+ * `fail` marks the recording failed once the handler returns, so the clip is
+ * still filmed to the end and still saved as evidence.
+ */
+export interface ActionContext {
+  /** The clip is usable but something the doc promises was not observed. */
+  warn: (message: string) => void;
+  /** The feature under test did not work. The recording finishes, then fails. */
+  fail: (message: string) => void;
+  /** Resolved timeouts for this page. */
+  timeouts: RecorderTimeouts;
+}
+
+/**
+ * Every fixed wait in the recorder, in one place.
+ *
+ * These used to be literals scattered through `core/`. Defaults live in
+ * `core/timeouts.ts`; a project sets `PROJECT.timeouts` and a page sets
+ * `timeouts` to override.
+ */
+export interface RecorderTimeouts {
+  /** Loading the external doc page. */
+  docNavMs: number;
+  /** Loading the demo route. First hit on a dev route compiles it. */
+  demoNavMs: number;
+  /** Chat surface visible after the demo route loads. */
+  chatReadyMs: number;
+  /** A reply *starting* after the prompt is sent. */
+  replyStartMs: number;
+  /** A reply finishing once it has started. */
+  replyStreamMs: number;
+}
+
 export type PageActionHandler = (
   page: Page,
   config: PageRecordConfig,
   rootPath: string,
+  ctx: ActionContext,
 ) => Promise<void>;
