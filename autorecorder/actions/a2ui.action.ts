@@ -9,6 +9,11 @@
  * catalog snippet is not self-contained, so none is supplied. The agent answers
  * in prose and no declarative UI appears.
  *
+ * Before any of that, the take stops on the harness's own /a2ui notes route,
+ * marks the reconstructed `a2uiConfigForFeature` block and writes down that the
+ * guide never declares the catalogs it returns, so that code was written here.
+ * See actions/catalog-code.ts.
+ *
  * ── Why this take is adaptive ──────────────────────────────────────────────
  * The QA report describes this as a "catalog not found" error, and the React
  * sibling repo reproduces it as a console error naming a specific URL
@@ -30,7 +35,14 @@
 import { type Page } from 'playwright';
 
 import { AgentSilentError, sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
+import {
+  CATALOG_CODE_NOTE,
+  parkNoteWindowRight,
+  returnToDemo,
+  showReconstructedCatalogCode,
+} from './catalog-code';
 import { writeScratchNote } from './scratch-note';
+import { closeNotepad, openNotepad, typeInNotepad } from '../core/overlays/notepad';
 import { humanGlide, sleep } from '../core/overlays/cursor';
 import {
   captureConsole,
@@ -54,10 +66,36 @@ const A2UI_SURFACE =
 /** Console noise that names the actual failure rather than framework chatter. */
 const CATALOG_PATTERN = /catalog|a2ui|render_a2ui|basic_catalog/i;
 
+/**
+ * Types the catalog-code note beside the highlighted snippet.
+ *
+ * Spelled out rather than reusing `writeScratchNote`: that helper opens, types
+ * and closes in one call, and the window has to be moved off centre in between
+ * or it covers the very code the note is about.
+ */
+async function writeCatalogCodeNote(page: Page): Promise<void> {
+  await openNotepad(page, 'a2ui-catalogs.txt');
+  await parkNoteWindowRight(page);
+  await typeInNotepad(page, CATALOG_CODE_NOTE.join('\n'), {
+    charDelayMs: 34,
+    thinkChance: 0.02,
+  });
+  await closeNotepad(page, 3000);
+}
+
 export const runA2uiAction: PageActionHandler = async (
   page: Page,
   config: PageRecordConfig,
 ) => {
+  // First, whose code the catalog snippet is. Everything below shows that no
+  // catalog is registered; this shows why one could not be — and that the
+  // block on the notes route was written here rather than lifted from a guide
+  // that never declares it. Ahead of the console capture on purpose: the
+  // navigation it does would otherwise fill the capture with reload noise.
+  if (await showReconstructedCatalogCode(page, config, writeCatalogCodeNote)) {
+    await returnToDemo(page, config);
+  }
+
   // Capture starts before the prompt: the fetch that fails happens while the
   // surface is being drawn, so a capture opened afterwards misses it.
   const capture = captureConsole(page);
