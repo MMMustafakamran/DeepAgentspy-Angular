@@ -334,7 +334,7 @@ export const PAGES = definePages([
     prompt: 'What is the priority set to right now?',
     prompts: [
       'What is the priority set to right now?',
-      'What is the priority set to right now?',
+      'And now? What is the priority?',
       'Which timezone am I on?',
     ],
     waitAfterPromptMs: 4000,

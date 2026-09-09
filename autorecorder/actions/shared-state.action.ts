@@ -11,8 +11,6 @@
 import { type Page } from 'playwright';
 
 import { promptsFor, sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
-
-import { writeScratchNote } from './scratch-note';
 import { humanClick, humanGlide, sleep } from '../core/overlays/cursor';
 import { type PageActionHandler, type PageRecordConfig } from '../core/types';
 
@@ -98,23 +96,5 @@ export const runSharedStateAction: PageActionHandler = async (
     await humanGlide(page, ctxBox.x + ctxBox.width / 2, ctxBox.y + ctxBox.height / 2, 22);
     await sleep(1500);
   }
-
-  // The finding, while the last unhelpful answer is still on screen.
-  if (config.knownIssue) {
-    await writeScratchNote(page, 'shared-state.txt', [
-      'shared state',
-      '',
-      'clicked mark high priority',
-      'ui updates - it says priority high',
-      '',
-      'asked the agent what priority is set as',
-      'it asks me what i mean',
-      'asked what my timezone is',
-      'says it has no access to it',
-      '',
-      'checked the request - state and context are',
-      'both in the post body so the browser is fine',
-      'the agent just never sees them',
-    ]);
-  }
 };
+
