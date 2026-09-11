@@ -32,13 +32,13 @@ export const PAGE_GROUPS = {
   // the dispatch form is already at GitHub's ten-input limit, and the page it
   // documents is reached from the quickstart's own closing step.
   getting_started: ['quickstart', 'inspector', 'chat-ui'],
-  generative_ui: ['frontend-tools-generative-ui', 'a2ui'],
+  generative_ui: ['frontend-tools-generative-ui'],
   interaction: ['voice-multimodal', 'human-in-the-loop'],
   shared_state: ['shared-state'],
   // Four demos sharing one doc page
   // (`guides/threads-memory-attachments-headless`), so they are one checkbox:
   // ticking it records that page end to end, which is how the doc reads.
-  threads: ['threads', 'memory', 'attachments', 'headless'],
+  threads: ['threads', 'headless'],
 };
 
 /**
