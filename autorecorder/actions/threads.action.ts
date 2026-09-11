@@ -22,7 +22,7 @@ import { type Page } from 'playwright';
 
 import { AgentSilentError, sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
 import { writeScratchNote } from './scratch-note';
-import { humanClick, humanGlide, sleep } from '../core/overlays/cursor';
+import { beat, humanClick, humanGlide, sleep } from '../core/overlays/cursor';
 import { type PageActionHandler, type PageRecordConfig } from '../core/types';
 
 /** Clicks a control if it is there, and says so if it is not. */
@@ -41,7 +41,7 @@ async function clickIfPresent(page: Page, selector: string, label: string): Prom
   await humanGlide(page, box.x + box.width / 2, box.y + box.height / 2, 22);
   await sleep(250);
   await humanClick(page);
-  await sleep(1200);
+  await beat(1200);
   return true;
 }
 
@@ -65,7 +65,7 @@ export const runThreadsAction: PageActionHandler = async (
   const listBox = await list.boundingBox().catch(() => null);
   if (listBox) {
     await humanGlide(page, listBox.x + Math.min(listBox.width / 2, 220), listBox.y + 40, 22);
-    await sleep(2600);
+    await beat(2600);
   }
 
   // Report what the list actually rendered, so the run log carries the same
@@ -87,7 +87,7 @@ export const runThreadsAction: PageActionHandler = async (
     'Retry',
   );
   if (retried) {
-    await sleep(2200);
+    await beat(2200);
   }
 
   // ── The drop-in drawer, which renders nothing ────────────────────────────
@@ -106,16 +106,16 @@ export const runThreadsAction: PageActionHandler = async (
     // space where the thread list should have been.
     console.log(`   🧵 Tracing the empty CopilotThreadsDrawer...`);
     await humanGlide(page, drawerBox.x + 30, drawerBox.y + 30, 22);
-    await sleep(900);
+    await beat(900);
     await humanClick(page);
-    await sleep(1200);
+    await beat(1200);
     await humanGlide(
       page,
       drawerBox.x + Math.min(drawerBox.width - 20, 260),
       drawerBox.y + Math.min(drawerBox.height - 20, 220),
       26,
     );
-    await sleep(2600);
+    await beat(2600);
   } else {
     console.log(`   🐞 copilot-threads-drawer occupies no space on the page at all.`);
   }

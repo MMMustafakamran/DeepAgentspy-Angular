@@ -35,7 +35,7 @@
 import { type Page } from 'playwright';
 
 import { promptsFor, sendPrompt, waitForAgentResponseCompletion } from '../core/actions';
-import { humanClick, humanGlide, sleep } from '../core/overlays/cursor';
+import { beat, humanClick, humanGlide, sleep } from '../core/overlays/cursor';
 import { type PageActionHandler, type PageRecordConfig } from '../core/types';
 
 import { waitForDomSettled } from './page-ready';
@@ -127,7 +127,7 @@ export const runToolsAction: PageActionHandler = async (
   const cardBox = await weatherCard.boundingBox().catch(() => null);
   if (cardBox) {
     await humanGlide(page, cardBox.x + cardBox.width / 2, cardBox.y + cardBox.height / 2, 22);
-    await sleep(2200);
+    await beat(2200);
   }
 
   // ── Browser-side tool, whose only output is the page repainting ───────────
@@ -138,9 +138,9 @@ export const runToolsAction: PageActionHandler = async (
 
   console.log(`   ✨ Showing the repainted background.`);
   await humanGlide(page, 500, 350, 25);
-  await sleep(1000);
+  await beat(1000);
   await humanGlide(page, 700, 520, 25);
-  await sleep(2000);
+  await beat(2000);
 
   // ── Display-only registration: the guide's new section, and the finding ───
   if (!incidentPrompt) return;
@@ -173,10 +173,10 @@ export const runToolsAction: PageActionHandler = async (
   const incidentBox = await incidentCard.boundingBox().catch(() => null);
   if (incidentBox) {
     await humanGlide(page, incidentBox.x + 60, incidentBox.y + 18, 22);
-    await sleep(2400);
+    await beat(2400);
     console.log(`   👇 Travelling to the follow-up turn beneath it.`);
     await humanGlide(page, incidentBox.x + 80, incidentBox.y + incidentBox.height + 70, 20);
-    await sleep(2600);
+    await beat(2600);
   }
 
   await writeScratchNote(page, 'registercomponent.txt', [
