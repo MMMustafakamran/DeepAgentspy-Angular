@@ -373,7 +373,6 @@ async function main() {
     ).elapsedSec;
 
     // 6. Warm routes so the recorder's own preflight is not racing a cold build.
-    await warmFrontendRoutes();
 
     // 7. Record
     console.log('\n▶ [Step] Running Autorecorder...');

@@ -290,7 +290,6 @@ uncommented placeholder there shadows a real key at the root.
 `frontend.log`. They are uploaded with the CI artifacts.
 
 **Recorder aborts on preflight** — the frontend was still compiling. The warmup
-step covers the usual routes; a page added to `WARMUP_ROUTES` in `lib/config.mjs`
 gets the same treatment.
 
 **The report says "No RECORD_RESULTS*.json found"** — nothing was recorded, or
