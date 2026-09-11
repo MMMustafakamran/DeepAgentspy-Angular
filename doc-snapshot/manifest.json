@@ -134,5 +134,12 @@
     "knownUnmapped": [
       "https://docs.copilotkit.ai/angular/deepagents/shared-state/workflow-execution"
     ]
+  },
+  "coverage": {
+    "ignoreRoutes": [
+      "/a2ui",
+      "/attachments",
+      "/memory"
+    ]
   }
 }

@@ -131,56 +131,77 @@ export function getPackageVersions() {
   return versions;
 }
 
-/**
- * Per-page outcomes, written by the recorder (`autorecorder/cli.ts`).
- *
- * Without this the videos table said "Recorded" beside every file, which is
- * true and useless: several pages here are recorded precisely because they are
- * broken, and a green tick next to one of those is how a defect quietly stops
- * being news.
- *
- * Sharded runs leave one file per shard; all of them are read and merged.
- */
-function readRecordResults() {
-  const byFilename = new Map();
+function sizeOf(file) {
   try {
-    for (const f of fs.readdirSync(VIDEOS_DIR)) {
-      if (!f.startsWith('RECORD_RESULTS') || !f.endsWith('.json')) continue;
-      const parsed = JSON.parse(fs.readFileSync(path.join(VIDEOS_DIR, f), 'utf8'));
-      for (const r of parsed.results ?? []) {
-        if (r.filename) byFilename.set(r.filename, r);
-      }
-    }
+    return `${(fs.statSync(file).size / (1024 * 1024)).toFixed(2)} MB`;
   } catch {
-    // No results file: a run that failed before recording, or a bare checkout.
+    return 'n/a';
   }
-  return byFilename;
 }
 
-const OUTCOME_LABEL = {
-  pass: '✅ Recorded',
-  issue: '🐞 Documents a known issue',
-  fail: '❌ Failed',
-};
-
+/**
+ * What this run recorded, from the recorder's own results file.
+ *
+ * This used to list every `.webm` in the folder and call each one "Recorded",
+ * so a run of one page reported five videos, four of them days old. The
+ * recorder now writes `RECORD_RESULTS.json` per run; that is the source. The
+ * directory listing remains only as a fallback for a run that died before the
+ * recorder could write it, and is labelled as such.
+ */
 function listVideos() {
+  // The recorder (autorecorder/cli.ts) writes RECORD_RESULTS.json for a plain
+  // run and RECORD_RESULTS.shard-N.json when sharded; read whichever exist and
+  // merge them, in file order.
+  try {
+    const files = fs.readdirSync(VIDEOS_DIR).filter((f) => /^RECORD_RESULTS.*\.json$/.test(f)).sort();
+    if (files.length === 0) throw new Error('no results file');
+    const runs = files.map((f) => JSON.parse(fs.readFileSync(path.join(VIDEOS_DIR, f), 'utf8')));
+    const results = runs.flatMap((run) => run.results ?? []);
+    return {
+      fromRun: true,
+      timestamp: runs[0].generatedAt ?? runs[0].timestamp,
+      videos: results.map((r) => ({
+        id: r.id,
+        name: r.name,
+        filename: r.filename || '',
+        status: !r.success ? 'failed' : r.outcome === 'issue' ? 'issue' : r.warnings?.length ? 'pass-with-notes' : 'pass',
+        area: r.knownIssue?.area ?? '',
+        notes: [...(r.warnings ?? []), ...(r.error ? [r.error] : [])],
+        // Kept verbatim so a downloaded package can be re-compared without the raw file.
+        error: r.error ?? null,
+        consoleErrors: r.consoleErrors ?? [],
+        sizeMB: r.filename ? sizeOf(path.join(VIDEOS_DIR, r.filename)) : 'n/a',
+        durationSec: r.durationSec,
+      })),
+    };
+  } catch {
+    // No results file: fall back to what is on disk, and say so.
+  }
+
   const videos = [];
   try {
     for (const f of fs.readdirSync(VIDEOS_DIR)) {
       if (!f.endsWith('.webm') || f.startsWith('temp_')) continue;
-      const stats = fs.statSync(path.join(VIDEOS_DIR, f));
-      videos.push({ filename: f, sizeMB: `${(stats.size / (1024 * 1024)).toFixed(2)} MB` });
+      videos.push({ filename: f, status: 'on-disk', area: '', notes: [], sizeMB: sizeOf(path.join(VIDEOS_DIR, f)) });
     }
   } catch {
     // ignore
   }
-  return videos;
+  return { fromRun: false, videos };
 }
+
+const STATUS_LABEL = {
+  pass: '✅ Recorded',
+  'pass-with-notes': '⚠️ Recorded with notes',
+  issue: '🐞 Documents a known issue',
+  failed: '❌ Failed',
+  'on-disk': '📁 On disk (no results file for this run)',
+};
 
 export function generateReport(data) {
   fs.mkdirSync(VIDEOS_DIR, { recursive: true });
 
-  const videos = listVideos();
+  const { videos, fromRun } = listVideos();
   const report = {
     timestamp: new Date().toISOString(),
     status: data.success ? 'SUCCESS' : 'FAILED',
@@ -248,13 +269,14 @@ export function generateReport(data) {
 
   lines.push('## 4. 🎬 Generated Demo Videos');
   if (videos.length > 0) {
-    const outcomes = readRecordResults();
-    lines.push('| Video File | Status | Area | File Size |');
-    lines.push('|---|---|---|---|');
+    if (!fromRun) {
+      lines.push('*The recorder wrote no results file for this run; listing what is on disk instead.*\n');
+    }
+    lines.push('| Video File | Status | Area | File Size | Notes |');
+    lines.push('|---|---|---|---|---|');
     for (const v of videos) {
-      const r = outcomes.get(v.filename);
-      const status = r ? (OUTCOME_LABEL[r.outcome] ?? r.outcome) : '✅ Recorded';
-      lines.push(`| \`${v.filename}\` | ${status} | ${r?.knownIssue?.area ?? ''} | ${v.sizeMB} |`);
+      const notes = v.notes.map((n) => n.replace(/\|/g, '\\|').replace(/\s+/g, ' ')).join('<br>');
+      lines.push(`| \`${v.filename || '(no video)'}\` | ${STATUS_LABEL[v.status] ?? v.status} | ${v.area ?? ''} | ${v.sizeMB} | ${notes} |`);
     }
   } else {
     lines.push('*No videos recorded in this run.*');

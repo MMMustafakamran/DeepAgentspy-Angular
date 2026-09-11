@@ -11,6 +11,7 @@ import { PROJECT } from './config/project.config';
 import { checkServicesHealth } from './core/diagnostics';
 import { RecordingEngine, type RecordOutcome } from './core/engine';
 import { runDoctor } from './core/doctor';
+import { prewarmDemoRoutes } from './core/prewarm';
 import { parseShard, selectPages } from './core/select';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -281,7 +282,7 @@ async function main(): Promise<void> {
 
   if (applied) {
     console.log(
-      `\n🧩 [Matrix Sharding]: Worker Shard ${applied.index}/${applied.total} -> Recording ${targetPages.length} pages (index ${applied.from + 1} to ${applied.to})`,
+      `\n🧩 [Matrix Sharding]: Worker Shard ${applied.index}/${applied.total} -> Recording ${targetPages.length} pages (positions ${applied.positions.join(', ')})`,
     );
   }
 
@@ -310,6 +311,8 @@ async function main(): Promise<void> {
   const results: PageResult[] = [];
   const suiteStartTime = Date.now();
 
+  await prewarmDemoRoutes(targetPages);
+
   for (const pageConfig of targetPages) {
     const pageStartTime = Date.now();
     const res = await engine.recordPage(pageConfig);
@@ -330,6 +333,8 @@ async function main(): Promise<void> {
 
   const shardId = shard ? `${shard.index}-${shard.total}` : null;
   const resultsPath = writeResultsFile(results, shardId);
+
+  await engine.shutdown();
 
   const totalDuration = ((Date.now() - suiteStartTime) / 1000).toFixed(1);
   const failedCount = results.filter((r) => r.outcome === 'fail').length;

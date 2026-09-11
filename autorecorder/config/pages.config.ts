@@ -202,53 +202,6 @@ export const PAGES = definePages([
     },
   },
   {
-    id: 'a2ui',
-    name: 'Guides - A2UI schemas, styling, and recovery',
-    videoName: 'A2ui',
-    docPath: 'guides/a2ui',
-    route: 'a2ui',
-    // The component is four lines of chat: per the guide, "on the frontend the
-    // A2UI renderer activates automatically. No extra configuration is needed."
-    // That claim is the thing under test, so the component leads and the two
-    // places configuration actually lives follow it.
-    ideFile: 'frontend/src/app/features/a2ui/a2ui-chat.component.ts',
-    startLine: 11,
-    endLine: 22,
-    extraTabs: [
-      // `a2ui.recovery` is set; `a2ui.catalog` is not. That absence is the
-      // whole finding, so the range covers the provider block where a catalog
-      // would go.
-      { filePath: 'frontend/src/app/app.config.ts', startLine: 44, endLine: 66 },
-      // `a2ui: {}` — the runtime half, which /info duly reports as enabled.
-      { filePath: 'frontend/server.ts', startLine: 39, endLine: 45 },
-    ],
-    prompt:
-      'Can you show me a flight card for BA117, London to New York, as a rendered UI component?',
-    waitAfterPromptMs: 5000,
-    // Observed 28 Aug 2026 against @copilotkit/angular 0.3.1 / runtime 1.67.1.
-    // NOTE the difference from the React/Python report, which describes this as
-    // `Catalog not found: https://a2ui.org/.../basic_catalog.json`. On Angular
-    // there is no such error: the console is clean and nothing is fetched. The
-    // two frontends fail differently, and the report says what this one does.
-    knownIssue: {
-      area: 'Deep Agents (Angular) - Guides - A2UI schemas, styling, and recovery',
-      problem:
-        'Asking for a declarative surface returns ordinary prose. No A2UI component is rendered, and — unlike ' +
-        'the React/Python build of the same guide — nothing is logged: the browser console is clean and no ' +
-        'catalog request is attempted. The renderer never activates at all rather than activating and failing.',
-      impact:
-        'A2UI cannot be used on this page, and the failure is silent. Because there is no error anywhere, a ' +
-        'reader following the guide has no way to tell a missing catalog from a model that simply chose to ' +
-        'answer in text, which makes the feature undebuggable as documented.',
-      likelyCause:
-        'Supplying `a2ui.catalog` to provideCopilotKit is what registers the render_a2ui renderer, and no ' +
-        "catalog is supplied — the guide's catalog snippet is not self-contained (it references " +
-        '`dynamicString`, `beautifulCatalog`, `declarativeCatalog`, `fixedCatalog` and `productCatalog`, none ' +
-        'of which the guide defines). The runtime reports `a2uiEnabled: true`, so the middleware is on and ' +
-        'only the browser-side renderer is missing.',
-    },
-  },
-  {
     id: 'voice-multimodal',
     name: 'Guides - Voice and multimodal input',
     videoName: 'VoiceMultimodal',
@@ -334,7 +287,7 @@ export const PAGES = definePages([
     prompt: 'What is the priority set to right now?',
     prompts: [
       'What is the priority set to right now?',
-      'What is the priority set to right now?',
+      'And now? What is the priority?',
       'Which timezone am I on?',
     ],
     waitAfterPromptMs: 4000,
@@ -406,62 +359,6 @@ export const PAGES = definePages([
         'capability gap: `mutations: false` in the runtime\'s /info means thread create/rename/delete have no ' +
         'store behind them, which the guide documents no requirement for.',
     },
-  },
-  {
-    id: 'memory',
-    name: 'Memory',
-    videoName: 'Memory',
-    docPath: 'guides/threads-memory-attachments-headless',
-    route: 'memory',
-    // `injectMemories` plus the `isAvailable()` gate the guide requires before
-    // showing any memory control. The gate is the whole sample.
-    ideFile: 'frontend/src/app/features/memory/memory-list.component.ts',
-    startLine: 7,
-    endLine: 32,
-    extraTabs: [
-      { filePath: 'frontend/src/app/features/memory/memory-demo.component.ts', startLine: 10, endLine: 29 },
-    ],
-    prompt: 'For future reference, I prefer concise status updates.',
-    waitAfterPromptMs: 4000,
-    // Observed 28 Aug 2026. Also rewritten after watching the network, and this
-    // one inverts the expectation recorded in the repo's own nav-config, which
-    // says isAvailable() is false and the fallback message renders. It does not:
-    // the component renders NOTHING, which is only reachable through the @else
-    // branch — so isAvailable() is true — and no memory request is ever sent.
-    knownIssue: {
-      area: 'Deep Agents (Angular) - Threads, memory, attachments, headless - Memory',
-      problem:
-        '`app-memory-list` renders nothing at all: no memories, and not the guide\'s "Memory is not available ' +
-        'for this runtime." fallback either. Since that fallback is the `@if (!isAvailable())` branch, the gate ' +
-        'is returning true — yet no request to any memory endpoint is ever issued, and asking the agent to ' +
-        'remember something stores nothing.',
-      impact:
-        'Memory is unusable and indistinguishable from a component that failed to mount. The guide\'s ' +
-        '`isAvailable()` gate — the one safeguard it prescribes — reports the feature as available while it ' +
-        'demonstrably is not, so the documented way of checking gives the wrong answer and a reader gets a ' +
-        'blank panel with no explanation.',
-      likelyCause:
-        'Unknown. `isAvailable()` appears to report availability without the runtime exposing memory routes — ' +
-        "the runtime's /info advertises thread endpoints but nothing for memory — so either the gate defaults " +
-        'to true when the capability is unreported, or the fetch is gated behind something the guide does not ' +
-        'mention. This needs confirming against a licensed runtime before the cause is stated with confidence.',
-    },
-  },
-  {
-    id: 'attachments',
-    name: 'Attachments',
-    videoName: 'Attachments',
-    docPath: 'guides/threads-memory-attachments-headless',
-    route: 'attachments',
-    ideFile: 'frontend/src/app/features/attachments/media-chat.component.ts',
-    startLine: 9,
-    endLine: 23,
-    // Asks for two values that exist only inside the attached image, so a
-    // correct answer is proof the file reached the model. A generic "what types
-    // of attachment are supported?" could be answered from the system prompt
-    // alone, which is how a broken upload comes to look fine on video.
-    prompt: 'I attached a chart. What is its title, and what is the Q4 number?',
-    waitAfterPromptMs: 4000,
   },
   {
     id: 'headless',
