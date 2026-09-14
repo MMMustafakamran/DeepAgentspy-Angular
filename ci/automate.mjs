@@ -31,7 +31,7 @@ import {
   isWindows,
 } from './lib/config.mjs';
 import { loadEnvFiles, trimInheritedCredentials } from './lib/env.mjs';
-import { assertModelCredentials, assertPortsFree, warmFrontendRoutes } from './lib/preflight.mjs';
+import { assertModelCredentials, assertPortsFree } from './lib/preflight.mjs';
 import { muxAudioFiles } from './lib/mux.mjs';
 import { generateReport } from './lib/report.mjs';
 import { buildDocumentedReport } from './build-report.mjs';
