@@ -175,7 +175,7 @@ export const PAGES = definePages([
         'The page’s new first section, “Let the agent display one of your components”, runs — and its ' +
         'published snippet is wrong four ways. (1) It carries no `handler`, so core writes an empty tool ' +
         'result and the model is always handed a second turn nobody asked for; what lands there is ' +
-        'model-dependent, a false apology contradicting the card on gpt-5.6-luna and filler on stronger ' +
+        'model-dependent, a false apology contradicting the card on gpt-5.4-mini and filler on stronger ' +
         'models. (2) It guards on `status === "in-progress"`, but the status observed while arguments ' +
         'stream is `"executing"`, so the guard never fires and the `@else` branch paints an empty card ' +
         'first. (3) The status never reaches `"complete"` at all — sampled once a second for 25 seconds. ' +

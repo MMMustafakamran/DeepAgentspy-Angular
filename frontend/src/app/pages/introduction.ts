@@ -55,7 +55,7 @@ Copilot Runtime  ·  localhost:8200        &#8592; Node, frontend/server.ts
 DeepAgents agent  ·  localhost:8123       &#8592; Python, langgraph dev
   &#124;  create_deep_agent(middleware=[CopilotKitMiddleware()])
   v
-Model  (gpt-5.6-luna)</code></pre>
+Model  (gpt-5.4-mini)</code></pre>
 
         <p class="mt-3 text-sm text-slate-700">
           Three processes, not two. Unlike the React quickstart — where the
