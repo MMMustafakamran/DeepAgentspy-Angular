@@ -260,7 +260,22 @@ export const PAGES = definePages([
         endLine: 48,
       },
     ],
-    prompt: 'Please delete my account. Check with me before you actually do it.',
+    // Whether this page pauses is the model's decision, so the prompt is the
+    // whole reliability story -- see actions/hitl.action.ts.
+    //
+    // Turn 1 asks for something this agent could plausibly do. The previous
+    // wording ("please delete my account") asked for a capability it does not
+    // have, so the natural answer was a refusal, not a tool call, and the card
+    // appeared only some of the time.
+    //
+    // Turn 2 names the tool, and is sent only when turn 1 produced no card.
+    // Needing it is a finding, not a fix: the action reports it.
+    prompt:
+      'Email the research summary to dana@example.com, but check with me before it goes out.',
+    prompts: [
+      'Email the research summary to dana@example.com, but check with me before it goes out.',
+      'Use your approval tool to confirm with me first, then send it.',
+    ],
     waitAfterPromptMs: 4000,
   },
   {
