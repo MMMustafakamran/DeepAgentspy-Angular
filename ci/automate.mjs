@@ -170,17 +170,21 @@ function runSync(command, cwd, description) {
  * mid-run leaves no trace at all. A file gets both: no buffer to fill, and a
  * log to attach to the run artifacts.
  */
-function spawnServer(command, cwd, logName) {
+function spawnServer(command, cwd, logName, extraEnv = {}) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
   const logPath = path.join(LOGS_DIR, logName);
   const fd = fs.openSync(logPath, 'w');
   logHandles.push(fd);
 
+  // `extraEnv` rather than a `VAR=value ` prefix on the command: `shell: true`
+  // is cmd.exe on Windows, which has no inline env-var syntax and would run
+  // the assignment as a command.
   const proc = spawn(command, {
     cwd,
     stdio: ['ignore', fd, fd],
     shell: true,
     detached: !isWindows,
+    env: { ...process.env, ...extraEnv },
   });
   return { proc, logPath };
 }
@@ -325,10 +329,26 @@ async function main() {
       // it to the project's dependencies, and keeps the project venv (where
       // `deepagents` lives). `uvx` would build an isolated env holding only the
       // CLI and fail to import the graph.
+      //
+      // `--with colorama` is a Windows requirement, not a preference.
+      // langgraph_api configures its logging through structlog's
+      // ConsoleRenderer, and structlog raises
+      //   SystemError: ConsoleRenderer with `colors=True` on Windows requires
+      //   the colorama package installed
+      // at import time when it is missing. The `[inmem]` extra does not pull
+      // it, so the server dies during logging setup before it ever listens,
+      // and the only symptom the pipeline shows is a health-check timeout.
+      // Surfaced by `uv sync --upgrade` resolving a newer structlog.
+      //
+      // LOG_COLOR=false is separate, and would not be enough on its own if a
+      // future version stopped reading it: stdout here is a log *file*, so the
+      // ANSI escapes ConsoleRenderer emits are noise in the one artifact
+      // anyone reads when the backend fails.
       const backend = spawnServer(
-        'uv run --with "langgraph-cli[inmem]" langgraph dev --port 8123 --no-browser --no-reload',
+        'uv run --with "langgraph-cli[inmem]" --with colorama langgraph dev --port 8123 --no-browser --no-reload',
         BACKEND_DIR,
         'backend.log',
+        { LOG_COLOR: 'false' },
       );
       backendProc = backend.proc;
       backendLog = backend.logPath;
