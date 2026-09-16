@@ -346,33 +346,34 @@ export const PAGES = definePages([
       // The drop-in half of the guide: CopilotThreadsDrawer beside a chat,
       // under one provideCopilotChatConfiguration.
       { filePath: 'frontend/src/app/features/threads/conversations.component.ts', startLine: 7, endLine: 23 },
-      { filePath: 'frontend/src/app/features/threads/threads-demo.component.ts', startLine: 10, endLine: 35 },
+      { filePath: 'frontend/src/app/features/threads/threads-demo.component.ts', startLine: 24, endLine: 47 },
     ],
     prompt: 'In one line, what are threads for?',
     waitAfterPromptMs: 4000,
-    // Observed 28 Aug 2026. This finding was rewritten after watching the
-    // network: the original assumption (borrowed from the sibling repos) was
-    // that listing is unlicensed and the drawer renders a locked state. Neither
-    // is true here. `GET /api/copilotkit/threads?agentId=support&limit=20`
-    // answers 200 with a real thread, and the hand-built list displays it. It is
-    // the drop-in component that renders nothing at all.
+    // Re-observed 16 Sep 2026, after the runtime started passing `intelligence`.
+    // The 28 Aug finding (empty drawer, `mutations: false`, null names) no longer
+    // holds: frames from the recorded clip show the drawer listing named threads,
+    // and the runtime reports `mode: "intelligence"` with mutations enabled. What
+    // remains is that none of this works until a step the guide never mentions.
     knownIssue: {
       area: 'Deep Agents (Angular) - Threads, memory, attachments, headless - Threads',
       problem:
-        '`CopilotThreadsDrawer` renders completely empty — no list, no launcher, no locked state, no error. ' +
-        'The data it needs is demonstrably available: on the same page the hand-built `injectThreads` list ' +
-        'shows a thread returned by `GET /api/copilotkit/threads` (200), which renders as "Untitled ' +
-        'conversation" because the API returns `name: null`. Creating a conversation additionally does not ' +
-        'persist — the runtime reports `threadEndpoints.mutations: false`.',
+        'The guide presents `injectThreads` and `CopilotThreadsDrawer` as drop-ins and never states that ' +
+        'both depend on CopilotKit Intelligence. Until `CopilotRuntime` is given an `intelligence` client ' +
+        '(a `CopilotKitIntelligence` built from a project API key), the runtime runs in SSE mode with ' +
+        '`threadEndpoints.mutations: false`, so no thread can be created, renamed or kept. The wiring is ' +
+        'documented on /angular/deepagents/intelligence/connect-your-runtime, which this guide never links. ' +
+        'Separately, the custom list in the guide emits bare `<button>` elements with no wrapper, so ' +
+        '"New conversation" and every thread name render run together on one line.',
       impact:
-        'The drop-in component the guide leads with is unusable, and silently so: a reader who follows the ' +
-        'guide gets a blank area with nothing indicating a missing licence, a failed request, or an empty ' +
-        'state. Naming or re-titling a conversation is impossible, so every thread reads as "Untitled".',
+        'A reader who follows this guide alone gets thread surfaces that never persist a conversation, with ' +
+        'no error, licence message or pointer to the missing step. Once wired, both surfaces work. The ' +
+        'published custom list is unreadable as soon as more than one thread exists.',
       likelyCause:
-        'Two separate causes. The empty drawer is a rendering failure in `copilot-threads-drawer` rather than ' +
-        'a data problem, since the same endpoint feeds the working list beside it. The non-persistence is a ' +
-        'capability gap: `mutations: false` in the runtime\'s /info means thread create/rename/delete have no ' +
-        'store behind them, which the guide documents no requirement for.',
+        'An unstated prerequisite: thread storage is an Intelligence feature, and the guide was written as if ' +
+        'the runtime from the quickstart already provided it. The snippet on that page is Next.js-only ' +
+        '(`export const { GET, POST, PATCH, DELETE }`), so an Angular reader must also adapt it to ' +
+        '`createCopilotNodeListener`. The run-together list is the published markup, unstyled.',
     },
   },
   {

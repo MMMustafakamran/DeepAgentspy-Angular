@@ -26,9 +26,9 @@ import { AUDIO_DIR, VIDEOS_DIR } from './config.mjs';
  *
  * The mapping is explicit rather than inferred from filenames, so a renamed demo
  * drops its voiceover visibly instead of quietly muxing it onto the wrong clip.
- * All four matches are unique across this repo's `videoName`s.
+ * All three matches are unique across this repo's `videoName`s.
  *
- * The four tracks live in `autorecorder/audio/` and are shared verbatim with the
+ * The three mapped tracks live in `autorecorder/audio/` and are shared verbatim with the
  * other Angular repos: the narration is about the CopilotKit concept, not the
  * agent framework behind it, and all of them now run the same handler for these
  * pages, so one recording fits AG2-, AGNO-, MASTRA-, MSPY- and DAPY-angular.
@@ -47,7 +47,9 @@ const AUDIO_TRACKS = [
   // lines up with a clip recorded by the current actions/voice.action.ts.
   { audioFile: 'angular- voice and attachments.m4a', videoMatch: 'VoiceMultimodal' },
   { audioFile: 'sharedstate-angular.m4a', videoMatch: 'SharedState' },
-  { audioFile: 'thread-angular.m4a', videoMatch: 'Threads' },
+  // No Threads track. thread-angular.m4a narrates the locked-threads take; the
+  // page now films working threads, so that voiceover no longer lines up and
+  // the clip stays silent.
 ];
 
 function hasFfmpeg() {
