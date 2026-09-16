@@ -22,7 +22,7 @@
  * https://docs.copilotkit.ai/angular/deepagents/guides/a2ui
  */
 import { createServer } from "node:http";
-import { CopilotRuntime } from "@copilotkit/runtime/v2";
+import { CopilotRuntime, CopilotKitIntelligence } from "@copilotkit/runtime/v2";
 import { createCopilotNodeListener } from "@copilotkit/runtime/v2/node";
 import { LangGraphAgent } from "@ag-ui/langgraph";
 
@@ -36,12 +36,31 @@ const deploymentUrl =
 // Graph id from backend/langgraph.json — `"sample_agent": "./main.py:agent"`.
 const graphId = process.env["DEEPAGENTS_GRAPH_ID"] ?? "sample_agent";
 
+/**
+ * Intelligence client, verbatim from
+ * https://docs.copilotkit.ai/angular/deepagents/intelligence/connect-your-runtime
+ * ("Wire the runtime"). Thread endpoints are served by Intelligence, so the
+ * Threads guide's `injectThreads` list and `CopilotThreadsDrawer` resolve to
+ * nothing until this is passed — which that guide never says.
+ *
+ * `apiUrl`/`wsUrl` default to the managed platform, so both stay unset.
+ */
+const intelligence = new CopilotKitIntelligence({
+  apiKey: process.env["CPK_INTELLIGENCE_API_KEY"]!,
+});
+
 const runtime = new CopilotRuntime({
   agents: {
     default: new LangGraphAgent({ deploymentUrl, graphId }),
     support: new LangGraphAgent({ deploymentUrl, graphId }),
   },
   a2ui: {},
+  intelligence,
+  // Threads are per-user. Without this every visitor shares one history.
+  identifyUser: (request) => ({
+    id: request.headers.get("x-user-id") ?? "anonymous",
+    name: request.headers.get("x-user-name") ?? "Anonymous",
+  }),
 });
 
 const port = Number(process.env["PORT"] ?? 8203);
