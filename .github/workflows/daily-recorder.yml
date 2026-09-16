@@ -374,6 +374,9 @@ jobs:
       # langchain-openai, so this is the only credential the run needs. There
       # are no Rich Threads pages here and so no license or Intelligence keys.
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      # Intelligence project key: the runtime passes `intelligence`, and
+      # CopilotKitIntelligence throws at construction when it is blank.
+      CPK_INTELLIGENCE_API_KEY: ${{ secrets.CPK_INTELLIGENCE_API_KEY }}
       # Read by backend/src/shared.py. The doc pages name several model ids
       # across them; every agent reads this one so a run cannot half-succeed
       # because one page wanted a model the key cannot reach.
