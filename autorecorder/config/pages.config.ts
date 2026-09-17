@@ -372,7 +372,8 @@ export const PAGES = definePages([
       likelyCause:
         'An unstated prerequisite: thread storage is an Intelligence feature, and the guide was written as if ' +
         'the runtime from the quickstart already provided it. The snippet on that page is Next.js-only ' +
-        '(`export const { GET, POST, PATCH, DELETE }`), so an Angular reader must also adapt it to ' +
+        '(`app/api/copilotkit/[[...slug]]/route.ts`, exporting one handler as `GET`, `POST`, `PATCH` and ' +
+        '`DELETE`), so an Angular reader must also adapt it to ' +
         '`createCopilotNodeListener`. The run-together list is the published markup, unstyled.',
     },
   },
