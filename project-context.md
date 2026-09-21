@@ -32,6 +32,14 @@ drift check → implement changed pages into frontend/+backend/ → record → r
    prerequisites. Report it even if inference makes the page work.
 4. Every finding pins installed vs declared versions.
 
+## Pages excluded from recording
+
+This repo implements none of the pages the owner has excluded from
+recording (Learning, Learned Skills, Memories, Markdown Rendering, the Jev
+cookbook), so its `pages.config.ts` has no `SKIP_RECORDING` entries. If one
+of those pages ever gains a route here, it is added to `SKIP_RECORDING`
+rather than filmed.
+
 ## Gaps the pipeline misses — check by hand
 
 - **New pages** — no route, no recorder entry, no diff; snapshotted but untested.
