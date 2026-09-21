@@ -31,7 +31,11 @@ on:
     # for 38 minutes. GitHub's scheduler is best-effort: every cron here has
     # fired three to six hours late. If exact timing ever matters, drive it
     # externally via `gh workflow run`.
-    - cron: '4 0 * * *'
+    # Weekdays only. The day-of-week field is set by the day the run LANDS,
+    # not the day the cron fires: a 23:xx UTC cron plus the delay above
+    # executes the next day, so Sun-Thu here means Mon-Fri PKT and no
+    # Saturday or Sunday run.
+    - cron: '4 0 * * 1-5'
   workflow_dispatch:
     inputs:
       group_getting_started:
