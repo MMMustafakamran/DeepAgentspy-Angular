@@ -289,6 +289,15 @@ the same `knownIssue` objects the clips put on screen — see *Recording and CI*
   heading. Aligning the two names fixes it. Not on the QA report, which scores
   this page as passing.
 
+- **Quickstart sends you to an Inspector tab that does not exist.** Since the
+  22 Sep 2026 sync, Quickstart (and the byte-identical landing page) says to
+  open **Rich Threads** in Inspector; the only change in that sync. The
+  Inspector still labels the tab `Threads`: `label: "Threads"` in
+  `@copilotkit/web-inspector` 1.70.1 (installed, not declared) and in 1.73.0
+  (latest on npm). The React `/deepagents/inspector` page has switched to the
+  new name, the `/agno` and `/ms-agent-python` copies have not (checked
+  22 Sep 2026). No code here uses the label, so nothing changed.
+
 ### Two inconsistencies in this repo, not in CopilotKit
 
 - **`backend/langgraph.json` declares `"python_version": "3.12"`** while

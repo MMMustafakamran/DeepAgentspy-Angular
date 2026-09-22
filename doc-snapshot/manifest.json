@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "docsRoot": "https://docs.copilotkit.ai/angular/deepagents",
-  "syncedAt": "2026-09-17T07:24:52.595Z",
+  "syncedAt": "2026-09-22T08:52:46.217Z",
   "pages": {
     "/angular/deepagents": {
       "file": "angular__deepagents.md",
-      "sha256": "67a19fd68111c59e4c4caf94ea95545d2bf6024be4b92833da1cc30b85dc9bb6",
-      "bytes": 7463,
+      "sha256": "a188b7cc1f1f985f0c3d87657b65c93c4f7b4f046d828300b3b934aa9f27d614",
+      "bytes": 7468,
       "lines": 191,
       "routes": [
         "/",
@@ -14,7 +14,7 @@
       ],
       "status": "ok",
       "age": 0,
-      "date": "Thu, 17 Sep 2026 07:24:52 GMT"
+      "date": "Tue, 22 Sep 2026 08:52:46 GMT"
     },
     "/angular/deepagents/guides/a2ui": {
       "file": "angular__deepagents__guides__a2ui.md",
@@ -117,15 +117,15 @@
     },
     "/angular/deepagents/quickstart": {
       "file": "angular__deepagents__quickstart.md",
-      "sha256": "67a19fd68111c59e4c4caf94ea95545d2bf6024be4b92833da1cc30b85dc9bb6",
-      "bytes": 7463,
+      "sha256": "a188b7cc1f1f985f0c3d87657b65c93c4f7b4f046d828300b3b934aa9f27d614",
+      "bytes": 7468,
       "lines": 191,
       "routes": [
         "/quickstart"
       ],
       "status": "ok",
       "age": 0,
-      "date": "Thu, 17 Sep 2026 07:24:52 GMT"
+      "date": "Tue, 22 Sep 2026 08:52:46 GMT"
     }
   },
   "sitemap": {
