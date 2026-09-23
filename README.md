@@ -195,6 +195,10 @@ They sit on the SSR server rather than the Copilot Runtime because that is the A
 
 Commit `doc-snapshot/` — `pages/`, `manifest.json` and `CHANGELOG.md` are the baseline every diff is taken against. `reports/` is gitignored.
 
+### Shared Angular pages in the sitemap (since 2026-09-23)
+
+On 2026-09-23 upstream's sitemap began listing the shared Angular pages once, framework-less, under `/angular/*` instead of once per framework under `/angular/deepagents/*`. `ci/check-doc-drift.mjs` now maps each of those onto `/angular/deepagents/<path>` (every one answers 200 there). That surfaced 47 shared pages this harness has never tracked (backend/*, deploy/*, intelligence/*, troubleshooting/*, webmcp, features, telemetry, …), including the new `intelligence/plans`, `intelligence/analytics` and `intelligence/channels`. All 47 are acknowledged in `sitemap.knownUnmapped` in `doc-snapshot/manifest.json`: reference-only, not recordable, untracked. Coverage is identical to before the sitemap restructure.
+
 ---
 
 ## Troubleshooting
@@ -239,6 +243,13 @@ the same `knownIssue` objects the clips put on screen — see *Recording and CI*
   renders as "Untitled conversation" because the API returns `name: null`.
   Creating a conversation also does not persist (`threadEndpoints.mutations:
   false`). Tracked on `/threads`.
+  *Partly re-checked 23 Sep 2026 at `@copilotkit/runtime` 1.73.3 (declared
+  `^1.73.3`) and `@copilotkit/angular` 0.5.2 (declared `^0.5.2`):* with the
+  runtime's `CopilotKitIntelligence` client configured, `/info` now reports
+  `threadEndpoints: { list, inspect, mutations, realtimeMetadata }` all
+  `true`, so the `mutations: false` detail no longer reproduces as stated.
+  The drawer rendering nothing and creation not persisting were not re-run in a
+  browser at these versions; the finding stands until they are.
 - **Memory's availability gate reports the wrong answer.** `app-memory-list`
   renders nothing at all — not the memories, and not the guide's "Memory is not
   available for this runtime." fallback. Since that fallback is the
@@ -282,6 +293,11 @@ the same `knownIssue` objects the clips put on screen — see *Recording and CI*
   (and `@copilotkit/runtime` to `^1.70.1`) to QA the section at all.
   Confirmed against the installed package on **4 Sep 2026**. Tracked on
   `/frontend-tools-generative-ui`.
+  *Re-checked 23 Sep 2026 at `@copilotkit/angular` 0.5.2 (declared `^0.5.2`,
+  installed `@copilotkit/core` 1.70.2):* the 0.5.1 → 0.5.2 and core 1.70.1 →
+  1.70.2 diffs touch slot rendering and thread/memory endpoint routing, not the
+  tool-call status values or the follow-up turn, so (1)–(4) still stand by
+  source. Not yet re-run against a live agent at 0.5.2.
 - **`getWeather` argument mismatch.** The agent declares
   `getWeather(location: str)`, but the frontend renderer in
   `src/app/features/tools/` is written against `{ city }`. The tool call still
@@ -297,6 +313,18 @@ the same `knownIssue` objects the clips put on screen — see *Recording and CI*
   (latest on npm). The React `/deepagents/inspector` page has switched to the
   new name, the `/agno` and `/ms-agent-python` copies have not (checked
   22 Sep 2026). No code here uses the label, so nothing changed.
+  *Re-checked 23 Sep 2026, still reproduces for an Angular reader.* Installed
+  now: `@copilotkit/web-inspector` **1.70.2** (not declared; exact-pinned by
+  `@copilotkit/angular` 0.5.2, declared `^0.5.2`, the latest release). The
+  tab there is still `label: "Threads"`. "Rich Threads" does appear in 1.70.x,
+  but only as a row in the launcher hover menu over the Inspector button
+  (`HUD_THREADS_LABEL = "Rich Threads"`), which opens the Inspector on the
+  Threads tab. That is not where the step, coming after two Inspector tabs,
+  sends you. web-inspector renamed the tab itself to "Rich Threads" in
+  **1.73.1** (published 22 Sep 2026; 1.73.0 still says "Threads"; latest is
+  1.73.3), but no `@copilotkit/angular` release can install it: 0.5.2 pins
+  1.70.2. The upstream `/angular/ms-agent-python` quickstart adopted
+  "Rich Threads" in the 23 Sep 2026 sync.
 
 ### Two inconsistencies in this repo, not in CopilotKit
 

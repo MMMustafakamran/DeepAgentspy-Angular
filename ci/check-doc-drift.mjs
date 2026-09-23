@@ -171,6 +171,35 @@ function manifestRoutes(docPath) {
   return (_manifestCache?.pages?.[docPath]?.routes ?? []).join(', ') || '-';
 }
 
+/**
+ * Since 2026-09-23 the sitemap lists the guides every Angular framework shares
+ * once, framework-less, as `/angular/X`; only framework-specific pages stay
+ * under `/angular/<framework>/`. The framework-scoped copies still serve and
+ * still sit in the sidebar, so map each shared `/angular/X` onto this section
+ * as `/angular/<framework>/X`. Otherwise every shared page reads as "no longer
+ * listed" and every new shared page goes unseen.
+ *
+ * A framework section is an `/angular/<slug>` listed bare AND with its own
+ * `/quickstart`; those belong to other frameworks and are skipped. Both are
+ * needed: `/angular/intelligence/quickstart` exists, but `intelligence` is a
+ * shared section, not a framework, and has no bare root.
+ */
+function sharedAngularPages(locs, root, prefix) {
+  const angular = `${root.origin}/angular/`;
+  if (!prefix.startsWith(angular)) return [];
+  const bare = new Set(locs.map((u) => u.match(/^https?:\/\/[^/]+\/angular\/([^/]+)$/)?.[1]));
+  const frameworks = new Set(
+    locs
+      .map((u) => u.match(/^https?:\/\/[^/]+\/angular\/([^/]+)\/quickstart$/)?.[1])
+      .filter((slug) => slug && bare.has(slug)),
+  );
+  return locs
+    .filter((u) => u.startsWith(angular))
+    .map((u) => u.slice(angular.length))
+    .filter((rest) => rest && !frameworks.has(rest.split('/')[0]))
+    .map((rest) => `${prefix}${rest}`);
+}
+
 export async function checkSitemapGaps(manifest) {
   _manifestCache = manifest;
   const root = new URL(manifest.docsRoot);
@@ -188,10 +217,12 @@ export async function checkSitemapGaps(manifest) {
     return { error: err.message, newUnmapped: [], missingFromSitemap: [] };
   }
 
-  const upstream = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)]
-    .map((m) => m[1].trim())
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim());
+  const upstream = [...new Set([
     // The section root itself is listed without the trailing slash.
-    .filter((u) => u.startsWith(prefix) || u === prefix.slice(0, -1));
+    ...locs.filter((u) => u.startsWith(prefix) || u === prefix.slice(0, -1)),
+    ...sharedAngularPages(locs, root, prefix),
+  ])];
 
   const covered = new Set(Object.keys(manifest.pages).map((docPath) => `${root.origin}${docPath}`));
   const known = new Set(manifest.sitemap?.knownUnmapped ?? []);
