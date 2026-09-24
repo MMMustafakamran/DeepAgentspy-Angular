@@ -29,7 +29,6 @@ import {
   LOGS_DIR,
   RECORDER_DIR,
   ROOT_DIR,
-  RUNTIME_PORT,
   isWindows,
 } from './lib/config.mjs';
 import { loadEnvFiles, trimInheritedCredentials } from './lib/env.mjs';
@@ -361,7 +360,10 @@ async function main() {
       console.log('▶ [Step] Frontend already running; reusing it.');
     } else {
       console.log('▶ [Step] Starting Frontend Server...');
-      const frontend = spawnServer('npm run dev', FRONTEND_DIR, 'frontend.log', { PORT: String(RUNTIME_PORT) });
+      // No PORT here: `npm run dev` starts both the runtime and `ng serve`, and the
+      // Angular dev server reads PORT too, so both tried to bind the runtime's
+      // port. frontend/server.ts already defaults to RUNTIME_PORT (8230).
+      const frontend = spawnServer('npm run dev', FRONTEND_DIR, 'frontend.log');
       frontendProc = frontend.proc;
       frontendLog = frontend.logPath;
     }
