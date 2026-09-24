@@ -83,25 +83,23 @@ Angular has no server route to host the Copilot Runtime the way a Next app does,
 so this stack is one process longer than its React twin:
 
 ```
-browser ──▶ ng serve :4203 ──▶ Copilot Runtime :8203 ──▶ langgraph dev :8123
+browser ──▶ ng serve :4230 ──▶ Copilot Runtime :8230 ──▶ langgraph dev :8231
             (frontend)         (frontend/server.ts)      (backend/main.py)
 ```
 
 | | Port | Started with | Health |
 |---|---|---|---|
-| Agent | 8123 | `uv run --with "langgraph-cli[inmem]" langgraph dev --port 8123 --no-browser --no-reload` | `/ok` |
-| Copilot Runtime | 8203 | `npm run dev` (with `ng serve`) | `/api/copilotkit/info` |
-| Frontend | 4203 | `npm run dev` (with the runtime) | `/` |
+| Agent | 8231 | `uv run --with "langgraph-cli[inmem]" langgraph dev --port 8231 --no-browser --no-reload` | `/ok` |
+| Copilot Runtime | 8230 | `npm run dev` (with `ng serve`) | `/api/copilotkit/info` |
+| Frontend | 4230 | `npm run dev` (with the runtime) | `/` |
 
-The ports are this repo's own. Its shipped defaults — 4200 and 8200 — are both
-already held by Agno-angular, and 8200 is additionally MsPy-angular's backend, so
-Angular and the runtime moved to 4203/8203. The langgraph dev server keeps 8123,
-which nothing else uses.
+The ports are this repo's own: it owns the 4230-4239 / 8230-8239 blocks, so it
+never collides with the other local stacks or with apps already on 3000/8000.
 
 `npm run dev` inside `frontend/` starts the first two together under
 `concurrently`, which is why the pipeline spawns two processes for three
 services — and why cleanup kills the whole process tree. Killing only the shell
-leaves the runtime and `ng serve` holding 8203 and 4203, and the next run refuses
+leaves the runtime and `ng serve` holding 8230 and 4230, and the next run refuses
 to start on a busy port.
 
 The backend is the **LangGraph dev server**, which serves every graph declared in

@@ -37,7 +37,7 @@ const PAGES_CONFIG = path.join(RECORDER_DIR, 'config', 'pages.config.ts');
 
 const ALWAYS_IGNORED = ['/', '/doc-sync'];
 
-/** `quickstart`, `/quickstart/`, `http://localhost:3000/quickstart?x` -> `/quickstart`. */
+/** `quickstart`, `/quickstart/`, `http://localhost:4230/quickstart?x` -> `/quickstart`. */
 export function normalizeRoutePath(raw) {
   let p = String(raw ?? '').trim();
   if (/^[a-z]+:\/\//i.test(p)) {

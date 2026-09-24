@@ -22,12 +22,14 @@ import path from 'node:path';
 import { checkAllDocDrift } from './check-doc-drift.mjs';
 import {
   BACKEND_DIR,
+  BACKEND_PORT,
   BACKEND_HEALTH_URL,
   FRONTEND_DIR,
   FRONTEND_URL,
   LOGS_DIR,
   RECORDER_DIR,
   ROOT_DIR,
+  RUNTIME_PORT,
   isWindows,
 } from './lib/config.mjs';
 import { loadEnvFiles, trimInheritedCredentials } from './lib/env.mjs';
@@ -251,7 +253,7 @@ async function main() {
 
       if (!ignoreDocDrift) {
         console.log('⚠️ Halting so you can review the doc changes first.');
-        console.log('👉 Review in browser: http://localhost:4203/doc-sync');
+        console.log(`👉 Review in browser: ${FRONTEND_URL}/doc-sync`);
         console.log('👉 To run anyway, pass `--ignore-doc-drift` or `--force`.');
         generateReport(reportData);
         process.exit(2);
@@ -345,7 +347,7 @@ async function main() {
       // ANSI escapes ConsoleRenderer emits are noise in the one artifact
       // anyone reads when the backend fails.
       const backend = spawnServer(
-        'uv run --with "langgraph-cli[inmem]" --with colorama langgraph dev --port 8123 --no-browser --no-reload',
+        `uv run --with "langgraph-cli[inmem]" --with colorama langgraph dev --port ${BACKEND_PORT} --no-browser --no-reload`,
         BACKEND_DIR,
         'backend.log',
         { LOG_COLOR: 'false' },
@@ -359,7 +361,7 @@ async function main() {
       console.log('▶ [Step] Frontend already running; reusing it.');
     } else {
       console.log('▶ [Step] Starting Frontend Server...');
-      const frontend = spawnServer('npm run dev', FRONTEND_DIR, 'frontend.log');
+      const frontend = spawnServer('npm run dev', FRONTEND_DIR, 'frontend.log', { PORT: String(RUNTIME_PORT) });
       frontendProc = frontend.proc;
       frontendLog = frontend.logPath;
     }

@@ -10,7 +10,7 @@
  * `npm run dev` in frontend/ starts the first two together via concurrently;
  * the backend is started separately.
  *
- *   browser -> ng serve :4203 -> Copilot Runtime :8203 -> langgraph dev :8123
+ *   browser -> ng serve :4230 -> Copilot Runtime :8230 -> langgraph dev :8231
  *              (frontend)        (frontend/server.ts)     (backend/main.py)
  */
 import path from 'node:path';
@@ -40,18 +40,17 @@ export const PROJECT_SLUG = 'DeepAgentspy-angular';
 
 /**
  * ── Ports ──────────────────────────────────────────────────────────────────
- * This repo shipped defaulting to 4200/8200, which are both already taken:
- * 4200 and 8200 by Agno-angular, and 8200 again by MsPy-angular's backend.
- * Angular and the runtime moved to 4203/8203 so all the stacks on this machine
- * can run at once. The langgraph dev server keeps 8123, which nothing else uses.
+ * This repo owns the 4230-4239 / 8230-8239 blocks so it never collides with
+ * the other local stacks or with apps already holding 3000/8000:
+ * ng serve 4230, Copilot Runtime 8230, langgraph dev 8231.
  *
  * Moving the runtime is a TWO-place edit: `PORT` (read by frontend/server.ts)
  * and `runtimeUrl` in frontend/src/app/app.config.ts, which hardcodes the URL
  * the browser posts to.
  */
-export const BACKEND_PORT = Number(process.env.BACKEND_PORT || 8123);
-export const RUNTIME_PORT = Number(process.env.PORT || 8203);
-export const FRONTEND_PORT = Number(process.env.FRONTEND_PORT || 4203);
+export const BACKEND_PORT = Number(process.env.BACKEND_PORT || 8231);
+export const RUNTIME_PORT = Number(process.env.PORT || 8230);
+export const FRONTEND_PORT = Number(process.env.FRONTEND_PORT || 4230);
 
 /**
  * The backend is the LangGraph dev server, not a FastAPI app: it serves every

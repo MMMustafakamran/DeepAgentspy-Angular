@@ -318,7 +318,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (result.sitemap.newUnmapped.length > 0) {
     console.log('🆕 [NEW UPSTREAM PAGES] Listed in the sitemap, tracked nowhere in this repo:');
     for (const u of result.sitemap.newUnmapped) console.log(` • ${u}`);
-    console.log('   Snapshot them from http://localhost:4203/doc-sync, or add them to\n' +
+    console.log('   Snapshot them from http://localhost:4230/doc-sync, or add them to\n' +
       '   sitemap.knownUnmapped in doc-snapshot/manifest.json to acknowledge them.\n');
   }
   const gone = result.driftedPages.filter((p) => p.status === '404' &&
@@ -359,7 +359,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         }
       }
 
-      console.log('\n👉 Local markdown files NOT modified. Pass `--update` or visit http://localhost:4203/doc-sync to sync.');
+      console.log('\n👉 Local markdown files NOT modified. Pass `--update` or visit http://localhost:4230/doc-sync to sync.');
       process.exit(2);
     }
   }

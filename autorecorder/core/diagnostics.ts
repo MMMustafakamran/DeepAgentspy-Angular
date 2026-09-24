@@ -26,7 +26,7 @@ interface ProbeTarget {
  * `localhost` to `127.0.0.1` and gets a refusal - so a server a browser opens
  * fine probes as dead. Both literals are tried, carrying `Host: localhost:<port>`
  * because Angular's SSRF guard rejects a bracketed-IPv6 Host outright ("Header
- * host with value [::1]:4200 is not allowed"), which is a *response* and would
+ * host with value [::1]:4230 is not allowed"), which is a *response* and would
  * otherwise read as healthy.
  *
  * `ci/automate.mjs` has carried this in its own waits for some time. This

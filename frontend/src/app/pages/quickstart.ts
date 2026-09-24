@@ -60,7 +60,7 @@ import { Callout, Panel, SourceCode, TryIt } from '../components/ui';
 
       <ui-callout title="Verify the runtime before blaming the frontend">
         The quickstart's troubleshooting box prescribes one check:
-        <code>http://localhost:8200/api/copilotkit/info</code> should report the
+        <code>http://localhost:8230/api/copilotkit/info</code> should report the
         registered agents. The Introduction route probes exactly that.
       </ui-callout>
 

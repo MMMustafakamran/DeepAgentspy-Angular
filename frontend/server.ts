@@ -26,12 +26,12 @@ import { CopilotRuntime, CopilotKitIntelligence } from "@copilotkit/runtime/v2";
 import { createCopilotNodeListener } from "@copilotkit/runtime/v2/node";
 import { LangGraphAgent } from "@ag-ui/langgraph";
 
-// The DeepAgents dev server binds port 8123. Start it from backend/ with:
-//   uv run --with "langgraph-cli[inmem]" langgraph dev --port 8123 --no-browser
+// The DeepAgents dev server binds port 8231. Start it from backend/ with:
+//   uv run --with "langgraph-cli[inmem]" langgraph dev --port 8231 --no-browser
 // `uv run --with` keeps the project venv, which is where `deepagents` lives;
 // `uvx` would build an isolated env holding only the CLI and fail to import it.
 const deploymentUrl =
-  process.env["DEEPAGENTS_DEPLOYMENT_URL"] ?? "http://localhost:8123";
+  process.env["DEEPAGENTS_DEPLOYMENT_URL"] ?? "http://localhost:8231";
 
 // Graph id from backend/langgraph.json — `"sample_agent": "./main.py:agent"`.
 const graphId = process.env["DEEPAGENTS_GRAPH_ID"] ?? "sample_agent";
@@ -63,7 +63,7 @@ const runtime = new CopilotRuntime({
   }),
 });
 
-const port = Number(process.env["PORT"] ?? 8203);
+const port = Number(process.env["PORT"] ?? 8230);
 
 createServer(
   createCopilotNodeListener({

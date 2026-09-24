@@ -34,15 +34,15 @@ because a video of a dead page is worse than no video.
 
 Angular has no server route to host the Copilot Runtime, so it runs as its own
 Node process (`frontend/server.ts`). `npm run dev` starts **two** processes: that
-runtime on :8203 and `ng serve` on :4203. The browser posts across origins to the
+runtime on :8230 and `ng serve` on :4230. The browser posts across origins to the
 runtime, which is why `runtimeWarmPath` in `project.config.ts` is an absolute URL
 rather than a path.
 
 ```bash
-# :8123 — the DeepAgents graph, served by the LangGraph dev server
-cd backend && uv run --with "langgraph-cli[inmem]"   langgraph dev --port 8123 --no-browser --no-reload
+# :8231 — the DeepAgents graph, served by the LangGraph dev server
+cd backend && uv run --with "langgraph-cli[inmem]"   langgraph dev --port 8231 --no-browser --no-reload
 
-# :8203 runtime + :4203 ng serve, together under concurrently
+# :8230 runtime + :4230 ng serve, together under concurrently
 cd frontend && npm run dev
 ```
 
@@ -313,7 +313,7 @@ Two details worth knowing, because both were bugs once:
 
 **`Aborting before launching a browser`** — a service is down. The message names
 which one and the command to start it. `--force` overrides. Note this backend is
-`langgraph dev` on **:8123** answering `/ok`, not a FastAPI app on :8000.
+`langgraph dev` on **:8231** answering `/ok`, not a FastAPI app on :8000.
 
 **A page fails with "Agent never produced a response within 30s"** — either the
 demo is genuinely broken, or `selectors.config.ts → assistantMessage` does not
