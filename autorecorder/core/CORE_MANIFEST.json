@@ -1,9 +1,9 @@
 {
-  "actions.ts": "3b8a741c65fc05c7",
+  "actions.ts": "c1af361fc1073659",
   "compare.ts": "65742af33faf58fa",
-  "console-capture.ts": "eb91fb4e440a816b",
-  "diagnostics.ts": "e511f6151e51184b",
-  "doctor.ts": "0c05140adea79cb1",
+  "console-capture.ts": "f382dc5560281469",
+  "diagnostics.ts": "1e11e2af9d8d8296",
+  "doctor.ts": "561963f88c839bf1",
   "engine.ts": "edfed20a2ab2adac",
   "failure-evidence.ts": "70fe82fb63309a00",
   "ide/generator.ts": "930a02a744396319",
