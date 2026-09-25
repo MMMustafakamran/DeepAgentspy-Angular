@@ -27,6 +27,7 @@ autorecorder/videos/*.webm
 autorecorder/videos/logs/
 autorecorder/videos/RECORD_RESULTS*.json
 autorecorder/videos/RUN_REPORT.*
+autorecorder/videos/PROBES.*
 
 # Generated after install by ci/write-versions.mjs — it describes one run.
 frontend/VERSIONS.md

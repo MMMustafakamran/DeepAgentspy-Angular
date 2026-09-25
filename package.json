@@ -19,6 +19,7 @@
     "mux": "node ci/mux.mjs",
     "report": "node ci/build-report.mjs",
     "drift": "node ci/check-doc-drift.mjs",
+    "probes": "node ci/run-probes.mjs",
     "drift:sync": "node ci/check-doc-drift.mjs --update",
     "ci:pages": "node ci/list-pages.mjs"
   }

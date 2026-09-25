@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { FRONTEND_PORT, BACKEND_PORT, FRONTEND_DIR, BACKEND_DIR, VIDEOS_DIR } from './config.mjs';
+import { probesMarkdown } from '../run-probes.mjs';
 
 /**
  * What actually ran -- not what package.json asks for.
@@ -215,6 +216,7 @@ export function generateReport(data) {
     packages: getPackageVersions(),
     healthChecks: data.health || {},
     videos,
+    probes: data.probes || null,
     error: data.error || null,
   };
 
@@ -230,6 +232,9 @@ export function generateReport(data) {
   lines.push(`- **Generated At:** \`${report.timestamp}\``);
   lines.push(`- **Execution Mode:** \`${report.args}\``);
   lines.push(`- **Dependencies:** \`${report.refreshedDeps ? 'Re-resolved (--refresh)' : 'From lockfile'}\`\n`);
+
+  // Up top on purpose: a possibly-fixed finding is the loudest news a run has.
+  if (report.probes) lines.push(probesMarkdown(report.probes, '## 🧪 Finding probes'));
 
   lines.push('## 1. 🔍 Doc Drift Check');
   if (report.docDrift.driftDetected) {

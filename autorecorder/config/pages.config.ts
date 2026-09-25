@@ -418,4 +418,42 @@ export const PAGES = definePages([
     // Not a defect in the Inspector itself -- it works, and the framework does
     // mount it. The gap is in what the page says is sufficient to get it.
   },
+  // ── Findings clips ───────────────────────────────────────────────────────
+  // Not a doc-nav page: a findings clip that compiles the A2UI guide's code
+  // verbatim (FINDINGS.md minor note #1). Last so no other clip renumbers.
+  // The engine intro shows the doc and the WORKING code, and `route` is the
+  // working demo (the engine needs `chatReady` there before the handler runs).
+  // The handler (actions/compile-demos.action.ts) then plays the take: doc
+  // snippets, the verbatim file in the IDE, the real `ng serve` error, and
+  // typed notes. No prompt is sent; `prompt` only satisfies the registry
+  // contract.
+  {
+    id: 'a2ui-compile',
+    name: 'A2UI - Undefined names (#1)',
+    videoName: 'A2uiUndefinedNames',
+    docPath: 'guides/a2ui',
+    route: 'a2ui',
+    // `a2ui` with recovery and no catalog: what the harness can do from the guide.
+    ideFile: 'frontend/src/app/app.config.ts',
+    startLine: 54,
+    endLine: 56,
+    extraTabs: [
+      { filePath: 'frontend/src/app/features/a2ui/a2ui-chat.component.ts', startLine: 1, endLine: 22 },
+    ],
+    prompt: 'No prompt: this take compiles the guide code (see actions/compile-demos.action.ts).',
+    knownIssue: {
+      area: 'Deep Agents - Guides - A2UI schemas, styling, and recovery',
+      problem:
+        "The guide's three TypeScript blocks do not compile: they have no imports and reference " +
+        '`dynamicString`, `productCatalog`, `beautifulCatalog`, `declarativeCatalog` and `fixedCatalog`, ' +
+        'none of which the page defines. `ng build --configuration doc-a2ui` reports 22 TS2304 errors.',
+      impact:
+        'A reader cannot build a catalog from the page, and without a catalog A2UI never renders. ' +
+        '`ng serve` type-checks, so the copied code stops the dev server from starting.',
+      likelyCause:
+        'The snippets were lifted from the Showcase app without its imports or catalog definitions. ' +
+        '`dynamicString` exists in no CopilotKit package (closest: DynamicStringSchema in @a2ui/web_core); ' +
+        '`Catalog` comes from @copilotkit/a2ui-renderer/web-components and is not re-exported by @copilotkit/angular.',
+    },
+  },
 ]);

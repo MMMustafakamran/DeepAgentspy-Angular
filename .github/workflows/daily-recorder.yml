@@ -559,6 +559,8 @@ jobs:
             autorecorder/videos/RUN_REPORT-shard-*.md
             autorecorder/videos/RUN_REPORT-shard-*.json
             autorecorder/videos/RECORD_RESULTS*.json
+            autorecorder/videos/PROBES.json
+            autorecorder/videos/PROBES.md
             autorecorder/videos/logs/*.log
           if-no-files-found: ignore
           retention-days: 14

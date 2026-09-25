@@ -7,6 +7,7 @@
     "record": "tsx cli.ts",
     "record:list": "tsx cli.ts --list",
     "record:issues": "tsx cli.ts --pages=issues",
+    "capture:casts": "tsx scripts/capture-casts.ts",
     "mux": "node ../ci/mux.mjs",
     "doctor": "node ../ci/write-versions.mjs && tsx cli.ts --doctor",
     "doctor:online": "node ../ci/write-versions.mjs && tsx cli.ts --doctor --online",

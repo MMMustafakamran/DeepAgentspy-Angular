@@ -177,6 +177,21 @@ manual run before a job starts.
 The section map lives in `PAGE_GROUPS` in `lib/pages.mjs`, and a run fails if any
 page belongs to no section, so nothing can quietly become unreachable.
 
+## Finding probes
+
+`npm run probes` (`run-probes.mjs`) builds the verbatim doc code behind each
+open finding (`findings.probes.mjs`, keyed by FINDINGS.md number) with
+`ng build --configuration <doc-*>`, and classifies it: `still-broken` (the
+expected TS error is there), `possibly-fixed` (build passes or the error is
+gone), or `probe-error` (timeout/crash). Since CI re-resolves to the newest
+packages, `possibly-fixed` means an upstream release may have fixed a finding
+with no doc change. Output: `autorecorder/videos/PROBES.{json,md}`, plus
+`$GITHUB_STEP_SUMMARY`. Always exits 0 and never edits FINDINGS.md — removing
+a finding stays a human call. `automate.mjs` runs it after install (shard 1
+only in CI; `--skip-probes` to skip) and puts it at the top of RUN_REPORT.md.
+New probe: add an entry with a `doc-*` build configuration in
+`frontend/angular.json`.
+
 ## Adding a page
 
 1. Add it to `autorecorder/config/pages.config.ts`.
